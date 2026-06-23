@@ -59,6 +59,38 @@ class Translations
         }
     }
 
+    /**
+     * Resolve a URL to the current language's translation when it points to a
+     * Polylang-linked Page. Falls back to the given URL when Polylang is absent,
+     * the URL is not a local page, or no translation exists. Lets a single
+     * privacy-policy URL follow the site language automatically.
+     */
+    public function localizeUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '' || !function_exists('pll_get_post')) {
+            return $url;
+        }
+        $postId = url_to_postid($url);
+        if (!$postId) {
+            return $url;
+        }
+        // Resolve the post for the current language and return ITS permalink —
+        // not the stored URL. On a translated front page Polylang already maps
+        // url_to_postid() to the current-language post, so the translation can
+        // equal $postId; returning the stored URL there would keep the wrong
+        // language. get_permalink() of the resolved post is always correct.
+        $lang = function_exists('pll_current_language') ? (string) pll_current_language() : '';
+        $target = $lang !== ''
+            ? (int) pll_get_post($postId, $lang)
+            : (int) pll_get_post($postId);
+        if (!$target) {
+            $target = $postId; // no translation in this language → use the resolved post
+        }
+        $permalink = get_permalink($target);
+        return (is_string($permalink) && $permalink !== '') ? $permalink : $url;
+    }
+
     /** Translate an arbitrary English source string (not stored in settings). */
     public function translatePassthrough(string $value): string
     {

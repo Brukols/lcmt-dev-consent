@@ -89,7 +89,7 @@ class Banner
             $byCategory[$s->category][] = $s;
         }
 
-        $privacyUrl = trim((string) $this->settings->get('privacy_url', ''));
+        $privacyUrl = $this->t->localizeUrl((string) $this->settings->get('privacy_url', ''));
         $description = $t->get('texts.description');
         if ($privacyUrl !== '') {
             $description .= ' <a href="' . esc_url($privacyUrl) . '" target="_blank" rel="noopener">' . esc_html__('Learn more', 'lcmt-dev-consent') . '</a>';

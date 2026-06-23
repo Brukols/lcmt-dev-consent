@@ -52,6 +52,18 @@ loading the banner bundle until they actually trigger it.
 - Changing/withdrawing in the reopened panel runs the existing `commit()` →
   consent-log event + reload-on-removal, unchanged.
 
+## Privacy-policy URL localization
+
+The banner's "Learn more" link runs the stored `privacy_url` through
+[`Translations::localizeUrl()`](../src/Admin/Translations.php): when the URL points
+to a Polylang-linked **Page**, it resolves to the current language's translation
+of that page (`pll_get_post()` → `get_permalink()`). Falls back to the stored URL
+when Polylang is absent, the URL is external/not a page, or no translation exists.
+So a single admin field yields the right per-language privacy page automatically.
+(Caveat: in the REST-fetched reopen panel, Polylang's current language may default
+to the site's primary language, so the link there may point to the default-language
+page — the link in the first-shown server-rendered banner is always correct.)
+
 ## Runtime behavior (banner.ts)
 
 On first-time visit (some service at `wait`):

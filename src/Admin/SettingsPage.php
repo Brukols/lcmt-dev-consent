@@ -443,10 +443,12 @@ class SettingsPage
     private function tab_general(): void
     {
         $s = $this->settings->all();
-        // Show button/label *values* through the translation layer so the admin
-        // sees the localized default (e.g. "J'accepte") instead of the English
-        // source string — mirrors how Banner::render() displays them to visitors.
-        $textVal = fn(string $key): string => $this->t->get('texts.' . $key);
+        // Show the *source* string stored in settings (do NOT run it through the
+        // translation layer). The banner localizes these per language via the .mo
+        // / Polylang at render time, so the stored value must stay the source
+        // string — otherwise saving would bake one language into the database and
+        // break the other languages (e.g. French text showing on the English site).
+        $t = $s['texts'];
         $positions = [
             'bottom-left' => __('Bottom left', 'lcmt-dev-consent'),
             'bottom-right' => __('Bottom right', 'lcmt-dev-consent'),
@@ -471,11 +473,11 @@ class SettingsPage
             </tr>
             <tr>
                 <th><?= esc_html__('Banner title', 'lcmt-dev-consent') ?></th>
-                <td><input type="text" class="regular-text" name="lcmt[texts][title]" value="<?= esc_attr($textVal('title')) ?>"></td>
+                <td><input type="text" class="regular-text" name="lcmt[texts][title]" value="<?= esc_attr($t['title']) ?>"></td>
             </tr>
             <tr>
                 <th><?= esc_html__('Banner description', 'lcmt-dev-consent') ?></th>
-                <td><textarea name="lcmt[texts][description]" rows="4" class="large-text"><?= esc_textarea($textVal('description')) ?></textarea></td>
+                <td><textarea name="lcmt[texts][description]" rows="4" class="large-text"><?= esc_textarea($t['description']) ?></textarea></td>
             </tr>
             <tr>
                 <th><?= esc_html__('Privacy policy URL', 'lcmt-dev-consent') ?></th>
@@ -500,7 +502,7 @@ class SettingsPage
             foreach ($labels as $k => $label): ?>
                 <tr>
                     <th><?= esc_html($label) ?></th>
-                    <td><input type="text" class="regular-text" name="lcmt[texts][<?= esc_attr($k) ?>]" value="<?= esc_attr($textVal($k)) ?>"></td>
+                    <td><input type="text" class="regular-text" name="lcmt[texts][<?= esc_attr($k) ?>]" value="<?= esc_attr($t[$k] ?? '') ?>"></td>
                 </tr>
             <?php endforeach; ?>
         </table>
