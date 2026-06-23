@@ -50,13 +50,30 @@ One cookie row:
 ```php
 [
     'name'        => '_ga',                       // cookie / tracker name
-    'purpose'     => 'Audience measurement',      // finalité
+    // Purpose is a descriptive sentence (CNIL-style), NOT a terse category label:
+    'purpose'     => 'Registers a unique ID used to generate statistical data on how the visitor uses the site.',
     'retention'   => '13 months',                 // durée de conservation
     'issuer'      => 'Google',                     // depositing entity
     'third_party' => true,                         // first-party vs third-party
     'url'         => 'https://policies.google.com/privacy', // optional policy link
 ]
 ```
+
+**Purpose wording principle:** every shipped default `purpose` is a full,
+human-readable sentence describing what the cookie does — not a one-word category.
+The English source strings are translated to French via the `.mo`. Example
+defaults for Google Analytics (English source → French `.mo`):
+
+| Cookie | Purpose (FR, as shown) | Retention |
+|--------|------------------------|-----------|
+| `_ga` | Enregistre un identifiant unique utilisé pour générer des données statistiques sur la façon dont le visiteur utilise le site | 13 mois |
+| `_gat` (or `_dc_gtm_<property-id>`) | Utilisé pour réduire le taux de requêtes Google Analytics | 1 minute |
+| `_gid` | Utilisé pour distinguer les utilisateurs | 1 jour |
+| `_ga_<container-id>` | Conserve l'état de session pour Google Analytics 4 | 13 mois |
+
+The same descriptive style applies to the Facebook, Matomo, GTM/Consent-Mode and
+YouTube defaults. Services not predefined (e.g. Twitter/X, LinkedIn) are added by
+the admin (per-row editor) or via the filter, using the same descriptive wording.
 
 ### Storage
 - New settings key **`service_cookies`** (in the single `lcmt_dev_consent_settings`
