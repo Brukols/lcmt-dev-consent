@@ -1,5 +1,6 @@
 import "./banner.scss";
 import { runInjector } from "./injectors";
+import { ensureConsentId, logConsentEvent } from "./consent-log";
 import type { ServiceConfig, Status } from "./types";
 
 interface CookieValue {
@@ -31,6 +32,7 @@ class ConsentBanner {
     private cookieName: string;
     private cookieLifetimeDays: number;
     private values: CookieValue[] = [];
+    private consentId: string | null = null;
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -75,17 +77,25 @@ class ConsentBanner {
     private parseCookie(): CookieValue[] {
         const raw = getCookie(this.cookieName);
         if (!raw) return [];
-        return raw
-            .split("!")
+        const out: CookieValue[] = [];
+        raw.split("!")
             .filter((s) => s.length > 0)
-            .map((s) => {
+            .forEach((s) => {
                 const [key, status] = s.split("=");
-                return { key, status: status as Status };
+                if (key === "cid") {
+                    this.consentId = status || null;
+                    return;
+                }
+                out.push({ key, status: status as Status });
             });
+        return out;
     }
 
     private saveCookie(): void {
-        const value = this.values.map((v) => `!${v.key}=${v.status}`).join("");
+        let value = this.values.map((v) => `!${v.key}=${v.status}`).join("");
+        if (this.consentId) {
+            value += `!cid=${this.consentId}`;
+        }
         setCookie(this.cookieName, value, this.cookieLifetimeDays);
     }
 
@@ -191,9 +201,27 @@ class ConsentBanner {
             }
         });
 
+        this.consentId = ensureConsentId(this.consentId);
+        const event = this.classifyEvent(previouslyAccepted);
         this.saveCookie();
+        logConsentEvent(event);
         this.hide();
         if (needReload) window.location.reload();
+    }
+
+    private classifyEvent(previouslyAccepted: Record<string, boolean>): string {
+        const withdrawn = this.values.some(
+            (v) => previouslyAccepted[v.key] === true && v.status !== "true"
+        );
+        if (withdrawn) return "withdraw";
+
+        const allTrue = this.values.every((v) => v.status === "true");
+        if (allTrue) return "accept_all";
+
+        const allFalse = this.values.every((v) => v.status === "false");
+        if (allFalse) return "reject_all";
+
+        return "custom";
     }
 
     private hide(): void {

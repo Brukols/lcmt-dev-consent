@@ -125,6 +125,11 @@ class Assets
             'services' => array_values($services),
             'categories' => $categories,
             'texts' => (array) $this->settings->get('texts', []),
+            'log' => [
+                'enabled' => (bool) $this->settings->get('log_enabled', true),
+                'endpoint' => rest_url(\LcmtDev\Consent\Log\RestController::NAMESPACE . \LcmtDev\Consent\Log\RestController::ROUTE),
+                'nonce' => wp_create_nonce('wp_rest'),
+            ],
         ];
     }
 

@@ -41,4 +41,11 @@ class Consent
         }
         return true;
     }
+
+    public static function getConsentId(string $cookieName = 'cookieConsent'): ?string
+    {
+        $cookies = self::getCookies($cookieName);
+        $cid = $cookies['cid'] ?? null;
+        return (is_string($cid) && $cid !== '') ? $cid : null;
+    }
 }

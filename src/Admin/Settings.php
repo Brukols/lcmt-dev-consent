@@ -101,6 +101,8 @@ class Settings
             'cookie_name' => 'cookieConsent',
             'cookie_lifetime_days' => 365,
             'consent_version' => 0,
+            'log_enabled' => true,
+            'log_retention_months' => 36,
             'custom_css' => '',
         ];
     }

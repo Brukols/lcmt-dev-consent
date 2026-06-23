@@ -26,6 +26,9 @@ lcmt-dev-consent/
 │   │   ├── SettingsPage.php
 │   │   ├── Settings.php
 │   │   └── Translations.php
+│   ├── Log/
+│   │   ├── ConsentLog.php       # table create/upgrade, insert/query/purge, CSV, policy hash
+│   │   └── RestController.php   # POST lcmt-dev-consent/v1/log
 │   └── Services/
 │       ├── ServiceRegistry.php
 │       └── Service.php
@@ -76,6 +79,42 @@ Always runs if enabled. Emits a single `<style id="lcmt-consent-vars">:root{--lc
 ### 4. `wp_footer` priority 20 — `Banner::render()`
 - Only renders if `shouldRender()` returns true (banner enabled, at least one service configured, consent still incomplete).
 - Outputs the banner HTML with two views (`#lcmt-consent-main`, `#lcmt-consent-panel`), service list grouped by category.
+
+## Consent log ("registre / preuve de consentement")
+
+Server-side, auditable proof of consent (RGPD Art. 7 / CNIL). Added alongside the
+client-only cookie; the cookie remains the runtime source of truth for what to
+inject, the log is the audit trail.
+
+- **Table:** `{$wpdb->prefix}lcmt_consent_log` — columns `id`, `consent_id`
+  (anonymous UUID), `event` (`accept_all|reject_all|custom|withdraw`), `choices`
+  (JSON of service→bool), `policy_version` (12-char hash of the services list +
+  texts + categories + privacy_url shown at the time), `cookie_version`
+  (`consent_version` int), `created_at` (UTC). **No IP / identity stored.**
+- **Schema lifecycle:** created on `register_activation_hook` via `dbDelta`;
+  `ConsentLog::maybeUpgrade()` (hooked on `admin_init`) re-runs `createTable()`
+  when the stored `lcmt_dev_consent_db_version` option differs from
+  `ConsentLog::DB_VERSION`. Dropped in `uninstall.php`.
+- **Anonymous id:** the banner embeds `cid=<uuid>` as an extra pair in the
+  consent cookie (e.g. `!googleanalytics=true!cid=…`). `Consent::getConsentId()`
+  reads it; `isComplete()`/`isAllowed()` ignore it (they only test service keys).
+  Minted lazily on first commit / first YouTube accept — legacy cookies without a
+  `cid` keep working unchanged.
+- **REST route:** `POST lcmt-dev-consent/v1/log` (`RestController`). Permission =
+  valid `wp_rest` nonce (`X-WP-Nonce` header). Body carries **only** `{event}`;
+  the server reads `choices` + `cid` from the cookie sent with the request and
+  derives `policy_version` + `cookie_version` itself (never trusts the body for
+  them). Per-IP transient rate limit (30 req / 60 s; IP hashed into the transient
+  key, never persisted). Best-effort: a failed/blocked request never blocks the
+  client-side cookie write.
+- **Frontend trigger:** `assets/src/consent-log.ts` (`logConsentEvent` +
+  `ensureConsentId`); called from `banner.ts::commit()` (event classified by
+  before/after state) and `youtube.ts` (placeholder accept → `custom`).
+- **Retention cron:** daily `lcmt_dev_consent_purge` event (scheduled on
+  activation + re-ensured on `init`) calls `ConsentLog::purgeOlderThan(months)`
+  with `log_retention_months` (default 36). Unscheduled on deactivation/uninstall.
+- **Admin:** `SettingsPage` "Registre de consentement" tab — retention settings,
+  paginated/filterable record table, CSV export (`handleExport()`).
 
 ## Settings cache
 `Settings::all()` caches the merged option+defaults in an instance `$cache` property so repeated reads within a request don't re-parse the serialized array. Invalidated by `save()` and `bumpConsentVersion()`.

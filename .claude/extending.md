@@ -13,6 +13,27 @@ Consent::isComplete(['googletagmanager', 'matomo']); // bool
 ```
 These are static methods; no class instantiation needed. Cookie name defaults to `cookieConsent` — pass a custom name as the second arg if you've changed it in settings.
 
+## Consent log (proof of consent)
+Each consent action is recorded server-side in `wp_lcmt_consent_log` for RGPD
+Art. 7 / CNIL proof (see [architecture.md](architecture.md) for the full design).
+
+- The consent cookie carries an anonymous id as a `cid=<uuid>` pair. Read it with
+  `Consent::getConsentId($cookieName)` (returns `null` if absent).
+- If you build a **custom banner** instead of the bundled one, log events by
+  POSTing to the REST route after you write the cookie (incl. `cid`):
+  ```js
+  fetch(window.lcmtConsent.log.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.lcmtConsent.log.nonce },
+      credentials: 'same-origin',
+      body: JSON.stringify({ event: 'accept_all' }), // accept_all|reject_all|custom|withdraw
+  });
+  ```
+  The server reads `choices` + `cid` from the cookie and derives the policy/cookie
+  versions itself — `event` is the only body field. Logging is best-effort; never
+  block the user's choice on it. The endpoint + nonce are exposed in
+  `window.lcmtConsent.log` (`{enabled, endpoint, nonce}`).
+
 ## Register a custom service from code
 ```php
 add_filter('lcmt_dev_consent_services', function (array $services) {

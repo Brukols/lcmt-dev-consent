@@ -28,12 +28,19 @@ export interface Texts {
     panel_title: string;
 }
 
+export interface LogConfig {
+    enabled: boolean;
+    endpoint: string;
+    nonce: string;
+}
+
 export interface LcmtConsentConfig {
     cookieName: string;
     cookieLifetimeDays: number;
     services: ServiceConfig[];
     categories: Record<string, CategoryConfig>;
     texts: Texts;
+    log?: LogConfig;
 }
 
 declare global {

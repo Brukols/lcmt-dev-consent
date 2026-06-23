@@ -1,0 +1,19 @@
+{
+    "name": "lcmt-dev/consent-tests",
+    "description": "Dev-only test harness for the LCMT Dev Consent plugin.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "brain/monkey": "^2.6"
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

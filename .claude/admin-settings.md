@@ -15,6 +15,7 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 | `services` | `tab_services()` | `services.*` (predefined service config + GTM Consent Mode v2 checkbox) |
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
+| `consent_log` | `tab_consent_log()` | `log_enabled`, `log_retention_months` + read-only record browser (paginated/filterable) + CSV export button |
 
 ## Per-tab save — CRITICAL
 The form includes a hidden `<input name="lcmt_tab" value="{current-tab}">`. On save, `handleSave()` dispatches to `sanitizeForTab($tab, $input)` which returns **only the slice of settings belonging to that tab**. This partial array is then merged on top of existing settings via `Settings::save()` (which calls `array_replace_recursive`).
@@ -57,9 +58,13 @@ Single autoloaded row: `lcmt_dev_consent_settings`. Defaults live in [`Settings:
     'cookie_name' => 'cookieConsent',
     'cookie_lifetime_days' => 365,
     'consent_version' => 0,
+    'log_enabled' => true,            // consent_log tab — record consent events server-side
+    'log_retention_months' => 36,     // consent_log tab — daily cron purges older rows (1-120)
     'custom_css' => '',
 ]
 ```
+
+The `consent_log` tab also reads/writes the `wp_lcmt_consent_log` custom table (see [architecture.md](architecture.md)); those rows are **not** part of the option row. The CSV export is served by `handleExport()` (hooked on `admin_init`, exits with `text/csv`); the record table + filters are rendered read-only by `tab_consent_log()`.
 
 ## Sanitization summary
 - Text fields: `sanitize_text_field` (or `sanitize_textarea_field` for description + custom_css which still goes through `wp_strip_all_tags`).

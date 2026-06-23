@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: LCMT Dev — Consent 1.0.0\n"
+"Project-Id-Version: LCMT Dev — Consent 1.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-23 00:00+0000\n"
 "PO-Revision-Date: 2026-04-23 00:00+0000\n"
@@ -294,3 +294,52 @@ msgstr "Accepter et lire"
 
 msgid "YouTube video player"
 msgstr "Lecteur vidéo YouTube"
+
+# Consent log — "Registre de consentement" tab
+msgid "Registre de consentement"
+msgstr "Registre de consentement"
+
+msgid "Retention"
+msgstr "Conservation"
+
+msgid "Enable consent logging"
+msgstr "Activer la journalisation des consentements"
+
+msgid "Record an auditable proof of each consent event"
+msgstr "Conserver une preuve auditable de chaque consentement"
+
+msgid "Retention (months)"
+msgstr "Durée de conservation (mois)"
+
+msgid "Records older than this are deleted daily. Default 36 months."
+msgstr "Les enregistrements plus anciens sont supprimés quotidiennement. Par défaut 36 mois."
+
+msgid "Records"
+msgstr "Enregistrements"
+
+msgid "Consent ID"
+msgstr "Identifiant de consentement"
+
+msgid "All events"
+msgstr "Tous les évènements"
+
+msgid "Date (UTC)"
+msgstr "Date (UTC)"
+
+msgid "Event"
+msgstr "Évènement"
+
+msgid "Choices"
+msgstr "Choix"
+
+msgid "Policy"
+msgstr "Politique"
+
+msgid "No records."
+msgstr "Aucun enregistrement."
+
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "Export CSV (current filter)"
+msgstr "Exporter en CSV (filtre actuel)"

@@ -3,6 +3,7 @@ import "./youtube.scss";
 // `window.lcmtConsent` so we don't redeclare it (would conflict). Webpack
 // tree-shakes the runtime imports — the file declares only types + globals.
 import type {} from "./types";
+import { ensureConsentId, logConsentEvent } from "./consent-log";
 
 /**
  * Standalone YouTube placeholder upgrader.
@@ -75,7 +76,17 @@ function setYoutubeAccepted(): void {
     } else {
         entries.push({ key: SERVICE_KEY, status: "true" });
     }
+
+    const cidEntry = entries.find((e) => e.key === "cid");
+    const cid = ensureConsentId(cidEntry ? cidEntry.status : null);
+    if (cidEntry) {
+        cidEntry.status = cid;
+    } else {
+        entries.push({ key: "cid", status: cid });
+    }
+
     writeCookie(cookieName, serializeConsentCookie(entries), lifetime);
+    logConsentEvent("custom");
 }
 
 function buildIframe(videoId: string): HTMLIFrameElement {

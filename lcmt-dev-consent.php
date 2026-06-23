@@ -1,9 +1,10 @@
 <?php
+
 /**
- * Plugin Name: LCMT Dev — Consent
+ * Plugin Name: LCMT Dev - Consent
  * Plugin URI:  https://amaurylecomte.com
  * Description: Lightweight, performance-focused cookie consent banner. Loads banner JS/CSS only when consent is pending; injects accepted services server-side.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      Amaury Lecomte
  * Author URI:  https://amaurylecomte.com
  * Text Domain: lcmt-dev-consent
@@ -15,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('LCMT_DEV_CONSENT_VERSION', '1.0.0');
+define('LCMT_DEV_CONSENT_VERSION', '1.1.0');
 define('LCMT_DEV_CONSENT_FILE', __FILE__);
 define('LCMT_DEV_CONSENT_DIR', plugin_dir_path(__FILE__));
 define('LCMT_DEV_CONSENT_URL', plugin_dir_url(__FILE__));
@@ -29,6 +30,22 @@ spl_autoload_register(function ($class) {
     $path = LCMT_DEV_CONSENT_DIR . 'src/' . str_replace('\\', '/', $relative) . '.php';
     if (is_readable($path)) {
         require_once $path;
+    }
+});
+
+register_activation_hook(__FILE__, function () {
+    require_once __DIR__ . '/src/Admin/Settings.php';
+    require_once __DIR__ . '/src/Log/ConsentLog.php';
+    (new \LcmtDev\Consent\Log\ConsentLog(new \LcmtDev\Consent\Admin\Settings()))->createTable();
+    if (!wp_next_scheduled('lcmt_dev_consent_purge')) {
+        wp_schedule_event(time() + DAY_IN_SECONDS, 'daily', 'lcmt_dev_consent_purge');
+    }
+});
+
+register_deactivation_hook(__FILE__, function () {
+    $ts = wp_next_scheduled('lcmt_dev_consent_purge');
+    if ($ts) {
+        wp_unschedule_event($ts, 'lcmt_dev_consent_purge');
     }
 });
 

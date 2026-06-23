@@ -2,6 +2,7 @@
 
 namespace LcmtDev\Consent\Admin;
 
+use LcmtDev\Consent\Log\ConsentLog;
 use LcmtDev\Consent\Services\ServiceRegistry;
 
 class SettingsPage
@@ -12,18 +13,21 @@ class SettingsPage
     private Settings $settings;
     private ServiceRegistry $registry;
     private Translations $t;
+    private ConsentLog $log;
 
-    public function __construct(Settings $settings, ServiceRegistry $registry, Translations $t)
+    public function __construct(Settings $settings, ServiceRegistry $registry, Translations $t, ConsentLog $log)
     {
         $this->settings = $settings;
         $this->registry = $registry;
         $this->t = $t;
+        $this->log = $log;
     }
 
     public function register(): void
     {
         add_action('admin_menu', [$this, 'addMenu']);
         add_action('admin_init', [$this, 'handleSave']);
+        add_action('admin_init', [$this, 'handleExport']);
         add_action('admin_enqueue_scripts', [$this, 'adminAssets']);
     }
 
@@ -156,6 +160,12 @@ class SettingsPage
                     'cookie_lifetime_days' => max(1, min(3650, (int) ($input['cookie_lifetime_days'] ?? 365))),
                     'custom_css' => wp_strip_all_tags((string) ($input['custom_css'] ?? '')),
                 ];
+
+            case 'consent_log':
+                return [
+                    'log_enabled' => !empty($input['log_enabled']),
+                    'log_retention_months' => max(1, min(120, (int) ($input['log_retention_months'] ?? 36))),
+                ];
         }
         return [];
     }
@@ -181,6 +191,7 @@ class SettingsPage
             'services' => __('Services', 'lcmt-dev-consent'),
             'categories' => __('Categories', 'lcmt-dev-consent'),
             'advanced' => __('Advanced', 'lcmt-dev-consent'),
+            'consent_log' => __('Registre de consentement', 'lcmt-dev-consent'),
         ];
         if (!isset($tabs[$tab])) $tab = 'general';
 
@@ -475,6 +486,135 @@ class SettingsPage
                 </td>
             </tr>
         </table>
+        <?php
+    }
+
+    public function handleExport(): void
+    {
+        if (empty($_POST['lcmt_export_log']) || !current_user_can('manage_options')) {
+            return;
+        }
+        check_admin_referer(self::NONCE_ACTION);
+
+        $filters = [
+            'consent_id' => sanitize_text_field(wp_unslash($_POST['filter_consent_id'] ?? '')),
+            'event' => sanitize_key(wp_unslash($_POST['filter_event'] ?? '')),
+            'from' => sanitize_text_field(wp_unslash($_POST['filter_from'] ?? '')),
+            'to' => sanitize_text_field(wp_unslash($_POST['filter_to'] ?? '')),
+        ];
+
+        // Pull all matching rows (large pages; export is an admin-only action).
+        $result = $this->log->query($filters, 1, 500);
+        $rows = $result['rows'];
+        $page = 2;
+        while (count($rows) < $result['total'] && $page <= 200) {
+            $more = $this->log->query($filters, $page, 500);
+            $rows = array_merge($rows, $more['rows']);
+            $page++;
+        }
+
+        $csv = $this->log->exportCsv($rows);
+        nocache_headers();
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="consent-log-' . gmdate('Ymd-His') . '.csv"');
+        echo $csv;
+        exit;
+    }
+
+    private function tab_consent_log(): void
+    {
+        $s = $this->settings->all();
+        $filters = [
+            'consent_id' => isset($_GET['filter_consent_id']) ? sanitize_text_field(wp_unslash($_GET['filter_consent_id'])) : '',
+            'event' => isset($_GET['filter_event']) ? sanitize_key(wp_unslash($_GET['filter_event'])) : '',
+            'from' => isset($_GET['filter_from']) ? sanitize_text_field(wp_unslash($_GET['filter_from'])) : '',
+            'to' => isset($_GET['filter_to']) ? sanitize_text_field(wp_unslash($_GET['filter_to'])) : '',
+        ];
+        $page = max(1, (int) ($_GET['log_page'] ?? 1));
+        $perPage = 50;
+        $result = $this->log->query($filters, $page, $perPage);
+        $totalPages = max(1, (int) ceil($result['total'] / $perPage));
+        $events = ['accept_all', 'reject_all', 'custom', 'withdraw'];
+        ?>
+        <h3><?= esc_html__('Retention', 'lcmt-dev-consent') ?></h3>
+        <table class="form-table">
+            <tr>
+                <th><?= esc_html__('Enable consent logging', 'lcmt-dev-consent') ?></th>
+                <td><label><input type="checkbox" name="lcmt[log_enabled]" <?php checked(!empty($s['log_enabled'])); ?>> <?= esc_html__('Record an auditable proof of each consent event', 'lcmt-dev-consent') ?></label></td>
+            </tr>
+            <tr>
+                <th><?= esc_html__('Retention (months)', 'lcmt-dev-consent') ?></th>
+                <td>
+                    <input type="number" min="1" max="120" name="lcmt[log_retention_months]" value="<?= esc_attr($s['log_retention_months']) ?>">
+                    <p class="description"><?= esc_html__('Records older than this are deleted daily. Default 36 months.', 'lcmt-dev-consent') ?></p>
+                </td>
+            </tr>
+        </table>
+
+        <h3 style="margin-top:24px"><?= esc_html__('Records', 'lcmt-dev-consent') ?> (<?= (int) $result['total'] ?>)</h3>
+        <?php $base = admin_url('options-general.php?page=' . self::PAGE_SLUG . '&tab=consent_log'); ?>
+        <form method="get" style="margin:10px 0">
+            <input type="hidden" name="page" value="<?= esc_attr(self::PAGE_SLUG) ?>">
+            <input type="hidden" name="tab" value="consent_log">
+            <input type="text" name="filter_consent_id" value="<?= esc_attr($filters['consent_id']) ?>" placeholder="<?= esc_attr__('Consent ID', 'lcmt-dev-consent') ?>">
+            <select name="filter_event">
+                <option value=""><?= esc_html__('All events', 'lcmt-dev-consent') ?></option>
+                <?php foreach ($events as $e): ?>
+                    <option value="<?= esc_attr($e) ?>" <?php selected($filters['event'], $e); ?>><?= esc_html($e) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <input type="date" name="filter_from" value="<?= esc_attr($filters['from']) ?>">
+            <input type="date" name="filter_to" value="<?= esc_attr($filters['to']) ?>">
+            <?php submit_button(__('Filter', 'lcmt-dev-consent'), 'secondary', '', false); ?>
+        </form>
+
+        <table class="lcmt-services-table widefat striped">
+            <thead>
+                <tr>
+                    <th><?= esc_html__('Date (UTC)', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Event', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Consent ID', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Choices', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Policy', 'lcmt-dev-consent') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($result['rows'])): ?>
+                    <tr><td colspan="5"><?= esc_html__('No records.', 'lcmt-dev-consent') ?></td></tr>
+                <?php else: foreach ($result['rows'] as $row): ?>
+                    <tr>
+                        <td><?= esc_html($row['created_at']) ?></td>
+                        <td><?= esc_html($row['event']) ?></td>
+                        <td><code><?= esc_html($row['consent_id']) ?></code></td>
+                        <td><code style="font-size:11px"><?= esc_html($row['choices']) ?></code></td>
+                        <td><code><?= esc_html($row['policy_version']) ?></code></td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+
+        <?php if ($totalPages > 1): ?>
+            <p>
+                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                    <?php $args = array_merge(['log_page' => $p], array_filter([
+                        'filter_consent_id' => $filters['consent_id'],
+                        'filter_event' => $filters['event'],
+                        'filter_from' => $filters['from'],
+                        'filter_to' => $filters['to'],
+                    ])); ?>
+                    <a href="<?= esc_url(add_query_arg($args, $base)) ?>" style="<?= $p === $page ? 'font-weight:700' : '' ?>"><?= (int) $p ?></a>
+                <?php endfor; ?>
+            </p>
+        <?php endif; ?>
+
+        <form method="post" style="margin-top:16px">
+            <?php wp_nonce_field(self::NONCE_ACTION); ?>
+            <input type="hidden" name="filter_consent_id" value="<?= esc_attr($filters['consent_id']) ?>">
+            <input type="hidden" name="filter_event" value="<?= esc_attr($filters['event']) ?>">
+            <input type="hidden" name="filter_from" value="<?= esc_attr($filters['from']) ?>">
+            <input type="hidden" name="filter_to" value="<?= esc_attr($filters['to']) ?>">
+            <button type="submit" name="lcmt_export_log" value="1" class="button button-secondary"><?= esc_html__('Export CSV (current filter)', 'lcmt-dev-consent') ?></button>
+        </form>
         <?php
     }
 }
