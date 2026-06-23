@@ -17,6 +17,8 @@ class Service
     /** @var callable|null PHP callable returning the <script> HTML for wp_head injection. Receives $data. */
     public $injectPhp;
     public string $source; // 'ui' or 'code'
+    /** @var array<int,array<string,mixed>> Cookie metadata rows for the CNIL cookie table. */
+    public array $cookies;
 
     public function __construct(array $args)
     {
@@ -30,6 +32,7 @@ class Service
         $this->injectJs = isset($args['inject_js']) ? (string) $args['inject_js'] : null;
         $this->injectPhp = $args['inject_php'] ?? null;
         $this->source = (string) ($args['source'] ?? 'code');
+        $this->cookies = is_array($args['cookies'] ?? null) ? $args['cookies'] : [];
     }
 
     public function toClientConfig(): array

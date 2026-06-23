@@ -300,7 +300,7 @@ msgid "Registre de consentement"
 msgstr "Registre de consentement"
 
 msgid "Retention"
-msgstr "Conservation"
+msgstr "Durée de conservation"
 
 msgid "Enable consent logging"
 msgstr "Activer la journalisation des consentements"
@@ -343,3 +343,111 @@ msgstr "Filtrer"
 
 msgid "Export CSV (current filter)"
 msgstr "Exporter en CSV (filtre actuel)"
+
+# Cookie table — column headers + admin labels (note: "Retention", "Event",
+# "Choices", "Policy" are already defined above and reused here)
+msgid "Cookie"
+msgstr "Cookie"
+
+msgid "Purpose"
+msgstr "Fonctionnalité"
+
+msgid "Issuer"
+msgstr "Émetteur"
+
+msgid "third-party"
+msgstr "tiers"
+
+msgid "first-party"
+msgstr "interne"
+
+msgid "Essential"
+msgstr "Essentiel"
+
+msgid "This website"
+msgstr "Ce site"
+
+msgid "Stores your cookie consent choices so the banner is not shown again."
+msgstr "Enregistre vos choix de consentement afin que la bannière ne s'affiche plus."
+
+msgid "%d days"
+msgstr "%d jours"
+
+msgid "Cookies for the privacy-policy table"
+msgstr "Cookies pour le tableau de la politique de confidentialité"
+
+msgid "3rd-party"
+msgstr "Tiers"
+
+msgid "Policy URL"
+msgstr "URL de la politique"
+
+msgid "Add cookie"
+msgstr "Ajouter un cookie"
+
+msgid "Remove"
+msgstr "Supprimer"
+
+msgid "Politique de confidentialité"
+msgstr "Politique de confidentialité"
+
+msgid "Cookie table shortcode"
+msgstr "Code court du tableau des cookies"
+
+msgid "Paste this shortcode into your privacy-policy page to display the table of cookies used by your enabled services."
+msgstr "Collez ce code court dans votre page de politique de confidentialité pour afficher le tableau des cookies utilisés par vos services activés."
+
+msgid "Copy"
+msgstr "Copier"
+
+msgid "Hide the essential consent cookie with"
+msgstr "Masquez le cookie de consentement essentiel avec"
+
+msgid "Live preview"
+msgstr "Aperçu en direct"
+
+msgid "This is what visitors will see for your currently enabled services."
+msgstr "Voici ce que verront les visiteurs pour vos services actuellement activés."
+
+# Shipped default cookie purposes
+msgid "Registers a unique ID used to generate statistical data on how the visitor uses the site."
+msgstr "Enregistre un identifiant unique utilisé pour générer des données statistiques sur la façon dont le visiteur utilise le site."
+
+msgid "Used to throttle the request rate to Google Analytics."
+msgstr "Utilisé pour réduire le taux de requêtes Google Analytics."
+
+msgid "Used to distinguish users."
+msgstr "Utilisé pour distinguer les utilisateurs."
+
+msgid "Persists session state for Google Analytics 4."
+msgstr "Conserve l'état de session pour Google Analytics 4."
+
+msgid "Used to throttle the request rate to scripts loaded through Google Tag Manager."
+msgstr "Utilisé pour réduire le taux de requêtes des scripts chargés via Google Tag Manager."
+
+msgid "Used by Meta to deliver and measure advertising and to identify the visitor's browser across sites."
+msgstr "Utilisé par Meta pour diffuser et mesurer la publicité et pour identifier le navigateur du visiteur sur les sites."
+
+msgid "Stores the last advertising click to attribute conversions for Meta advertising."
+msgstr "Enregistre le dernier clic publicitaire pour attribuer les conversions de la publicité Meta."
+
+msgid "Stores a unique visitor ID used to generate site usage statistics."
+msgstr "Enregistre un identifiant de visiteur unique utilisé pour générer des statistiques d'utilisation du site."
+
+msgid "Stores temporary session data used to group a visitor's actions during a visit."
+msgstr "Enregistre des données de session temporaires utilisées pour regrouper les actions d'un visiteur pendant une visite."
+
+msgid "Estimates the visitor's bandwidth on pages that embed YouTube videos."
+msgstr "Estime la bande passante du visiteur sur les pages intégrant des vidéos YouTube."
+
+msgid "Stores a unique ID to keep statistics of the YouTube videos the visitor has seen."
+msgstr "Enregistre un identifiant unique pour conserver les statistiques des vidéos YouTube vues par le visiteur."
+
+msgid "Stores and tracks ad conversions for Google advertising services."
+msgstr "Enregistre et suit les conversions publicitaires pour les services publicitaires de Google."
+
+msgid "Used by Google to measure and personalize advertising based on user data."
+msgstr "Utilisé par Google pour mesurer et personnaliser la publicité à partir des données utilisateur."
+
+msgid "Stores preferences used to personalize Google advertising."
+msgstr "Enregistre les préférences utilisées pour personnaliser la publicité Google."

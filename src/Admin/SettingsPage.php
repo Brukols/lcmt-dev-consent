@@ -2,7 +2,9 @@
 
 namespace LcmtDev\Consent\Admin;
 
+use LcmtDev\Consent\Frontend\CookieTable;
 use LcmtDev\Consent\Log\ConsentLog;
+use LcmtDev\Consent\Services\CookieRegistry;
 use LcmtDev\Consent\Services\ServiceRegistry;
 
 class SettingsPage
@@ -14,6 +16,7 @@ class SettingsPage
     private ServiceRegistry $registry;
     private Translations $t;
     private ConsentLog $log;
+    private ?CookieRegistry $cookieRegistry = null;
 
     public function __construct(Settings $settings, ServiceRegistry $registry, Translations $t, ConsentLog $log)
     {
@@ -21,6 +24,96 @@ class SettingsPage
         $this->registry = $registry;
         $this->t = $t;
         $this->log = $log;
+    }
+
+    private function cookieRegistry(): CookieRegistry
+    {
+        if ($this->cookieRegistry === null) {
+            $this->cookieRegistry = new CookieRegistry($this->settings, $this->registry);
+        }
+        return $this->cookieRegistry;
+    }
+
+    private function cookieTable(): CookieTable
+    {
+        return new CookieTable($this->cookieRegistry(), $this->t);
+    }
+
+    private function tab_privacy(): void
+    {
+        $shortcode = '[lcmt_cookies_table]';
+        ?>
+        <h3><?= esc_html__('Cookie table shortcode', 'lcmt-dev-consent') ?></h3>
+        <p class="description"><?= esc_html__('Paste this shortcode into your privacy-policy page to display the table of cookies used by your enabled services.', 'lcmt-dev-consent') ?></p>
+        <p>
+            <input type="text" class="regular-text code" id="lcmt-shortcode" readonly value="<?= esc_attr($shortcode) ?>" onclick="this.select()">
+            <button type="button" class="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('<?= esc_js($shortcode) ?>');"><?= esc_html__('Copy', 'lcmt-dev-consent') ?></button>
+        </p>
+        <p class="description"><?= esc_html__('Hide the essential consent cookie with', 'lcmt-dev-consent') ?> <code>[lcmt_cookies_table essential="0"]</code>.</p>
+
+        <h3 style="margin-top:24px"><?= esc_html__('Live preview', 'lcmt-dev-consent') ?></h3>
+        <p class="description"><?= esc_html__('This is what visitors will see for your currently enabled services.', 'lcmt-dev-consent') ?></p>
+        <?php
+        // Reuse the front-end renderer. Output is escaped internally.
+        echo $this->cookieTable()->render([]); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    }
+
+    private function renderCookieEditor(string $serviceKey): void
+    {
+        $svc = $this->registry->find($serviceKey);
+        $rows = $svc ? $this->cookieRegistry()->forService($svc) : [];
+        // Fall back to shipped defaults when the service object is not built
+        // (e.g. predefined service currently disabled): show its defaults so the
+        // admin can pre-edit them.
+        if ($svc === null) {
+            $defaults = Settings::defaultServiceCookies();
+            foreach (($defaults[$serviceKey] ?? []) as $r) {
+                $rows[] = CookieRegistry::normalizeRow($r);
+            }
+        }
+        ?>
+        <details class="lcmt-cookie-editor">
+            <summary><?= esc_html__('Cookies for the privacy-policy table', 'lcmt-dev-consent') ?> (<?= count($rows) ?>)</summary>
+            <table class="lcmt-cookie-rows" data-service="<?= esc_attr($serviceKey) ?>">
+                <thead><tr>
+                    <th><?= esc_html__('Cookie', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Purpose', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Retention', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Issuer', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('3rd-party', 'lcmt-dev-consent') ?></th>
+                    <th><?= esc_html__('Policy URL', 'lcmt-dev-consent') ?></th>
+                    <th></th>
+                </tr></thead>
+                <tbody>
+                    <?php foreach ($rows as $i => $r): ?>
+                        <?php $this->cookieRowInputs($serviceKey, (string) $i, $r); ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <p>
+                <button type="button" class="button lcmt-add-cookie" data-service="<?= esc_attr($serviceKey) ?>"><?= esc_html__('Add cookie', 'lcmt-dev-consent') ?></button>
+            </p>
+            <template class="lcmt-cookie-template" data-service="<?= esc_attr($serviceKey) ?>">
+                <?php $this->cookieRowInputs($serviceKey, '__INDEX__', ['name' => '', 'purpose' => '', 'retention' => '', 'issuer' => '', 'third_party' => false, 'url' => '']); ?>
+            </template>
+        </details>
+        <?php
+    }
+
+    private function cookieRowInputs(string $serviceKey, string $i, array $r): void
+    {
+        $base = 'lcmt[service_cookies][' . $serviceKey . '][' . $i . ']';
+        ?>
+        <tr class="lcmt-cookie-row">
+            <td><input type="text" name="<?= esc_attr($base) ?>[name]" value="<?= esc_attr($r['name'] ?? '') ?>"></td>
+            <td><input type="text" class="regular-text" name="<?= esc_attr($base) ?>[purpose]" value="<?= esc_attr($r['purpose'] ?? '') ?>"></td>
+            <td><input type="text" name="<?= esc_attr($base) ?>[retention]" value="<?= esc_attr($r['retention'] ?? '') ?>"></td>
+            <td><input type="text" name="<?= esc_attr($base) ?>[issuer]" value="<?= esc_attr($r['issuer'] ?? '') ?>"></td>
+            <td style="text-align:center"><input type="checkbox" name="<?= esc_attr($base) ?>[third_party]" <?php checked(!empty($r['third_party'])); ?>></td>
+            <td><input type="url" name="<?= esc_attr($base) ?>[url]" value="<?= esc_attr($r['url'] ?? '') ?>"></td>
+            <td><button type="button" class="button-link lcmt-remove-cookie" aria-label="<?= esc_attr__('Remove', 'lcmt-dev-consent') ?>">&times;</button></td>
+        </tr>
+        <?php
     }
 
     public function register(): void
@@ -58,7 +151,41 @@ class SettingsPage
             .lcmt-services-table{width:100%;border-collapse:collapse}
             .lcmt-services-table th,.lcmt-services-table td{text-align:left;padding:8px;border-bottom:1px solid #eee;vertical-align:top}
             .lcmt-reset-row{display:flex;align-items:center;gap:10px}
+            .lcmt-cookie-editor{margin:6px 0 2px}
+            .lcmt-cookie-editor summary{cursor:pointer;color:#2271b1}
+            .lcmt-cookie-rows{width:100%;border-collapse:collapse;margin:8px 0}
+            .lcmt-cookie-rows th,.lcmt-cookie-rows td{border:1px solid #eee;padding:4px;vertical-align:top}
+            .lcmt-cookie-rows input[type=text],.lcmt-cookie-rows input[type=url]{width:100%}
+            .lcmt-cookie-editor-row>td{background:#fbfbfb}
         ');
+
+        wp_add_inline_script('wp-color-picker', <<<'JS'
+        (function(){
+            document.addEventListener('click', function(e){
+                var add = e.target.closest('.lcmt-add-cookie');
+                if (add) {
+                    var key = add.getAttribute('data-service');
+                    var tpl = document.querySelector('.lcmt-cookie-template[data-service="'+key+'"]');
+                    var tbody = document.querySelector('.lcmt-cookie-rows[data-service="'+key+'"] tbody');
+                    if (tpl && tbody) {
+                        var idx = 'n' + Date.now();
+                        var html = tpl.innerHTML.replace(/__INDEX__/g, idx);
+                        var wrap = document.createElement('tbody');
+                        wrap.innerHTML = html.trim();
+                        tbody.appendChild(wrap.firstChild);
+                    }
+                    e.preventDefault();
+                    return;
+                }
+                var rm = e.target.closest('.lcmt-remove-cookie');
+                if (rm) {
+                    var row = rm.closest('.lcmt-cookie-row');
+                    if (row) row.remove();
+                    e.preventDefault();
+                }
+            });
+        })();
+        JS);
     }
 
     public function handleSave(): void
@@ -162,7 +289,8 @@ class SettingsPage
                         $services[$key]['consent_mode'] = !empty($row['consent_mode']);
                     }
                 }
-                return ['services' => $services];
+                $cookies = $this->sanitizeServiceCookies((array) ($input['service_cookies'] ?? []));
+                return ['services' => $services, 'service_cookies' => $cookies];
 
             case 'categories':
                 $catsInput = $input['categories'] ?? [];
@@ -198,6 +326,44 @@ class SettingsPage
         return [];
     }
 
+    /**
+     * @param array<string,array<int,array<string,mixed>>> $input
+     * @return array<string,array<int,array<string,mixed>>>
+     */
+    public function sanitizeServiceCookies(array $input): array
+    {
+        $out = [];
+        foreach ($input as $serviceKey => $rows) {
+            $serviceKey = sanitize_key((string) $serviceKey);
+            if ($serviceKey === '' || !is_array($rows)) {
+                continue;
+            }
+            $clean = [];
+            foreach ($rows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $name = sanitize_text_field((string) ($row['name'] ?? ''));
+                if ($name === '') {
+                    continue; // drop empty rows
+                }
+                $url = esc_url_raw((string) ($row['url'] ?? ''));
+                $clean[] = [
+                    'name' => $name,
+                    'purpose' => sanitize_text_field((string) ($row['purpose'] ?? '')),
+                    'retention' => sanitize_text_field((string) ($row['retention'] ?? '')),
+                    'issuer' => sanitize_text_field((string) ($row['issuer'] ?? '')),
+                    'third_party' => !empty($row['third_party']),
+                    'url' => $url,
+                ];
+            }
+            if (!empty($clean)) {
+                $out[$serviceKey] = $clean;
+            }
+        }
+        return $out;
+    }
+
     private function sanitizeColor(string $value, string $default): string
     {
         $value = trim($value);
@@ -220,6 +386,7 @@ class SettingsPage
             'categories' => __('Categories', 'lcmt-dev-consent'),
             'advanced' => __('Advanced', 'lcmt-dev-consent'),
             'consent_log' => __('Registre de consentement', 'lcmt-dev-consent'),
+            'privacy' => __('Politique de confidentialité', 'lcmt-dev-consent'),
         ];
         if (!isset($tabs[$tab])) $tab = 'general';
 
@@ -401,6 +568,9 @@ class SettingsPage
                             </select>
                         </td>
                         <td><input type="text" name="lcmt[services][<?= esc_attr($key) ?>][display_name]" value="<?= esc_attr($row['display_name'] ?? '') ?>"></td>
+                    </tr>
+                    <tr class="lcmt-cookie-editor-row">
+                        <td colspan="5"><?php $this->renderCookieEditor($key); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

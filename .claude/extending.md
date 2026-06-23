@@ -34,6 +34,41 @@ Art. 7 / CNIL proof (see [architecture.md](architecture.md) for the full design)
   block the user's choice on it. The endpoint + nonce are exposed in
   `window.lcmtConsent.log` (`{enabled, endpoint, nonce}`).
 
+## Cookie information table (`[lcmt_cookies_table]`)
+Renders a CNIL-style table (Service · Cookie · Purpose · Retention · Issuer) of the
+cookies used by the **enabled** services, for the privacy-policy page.
+
+- Place `[lcmt_cookies_table]` on any page/post. Add `essential="0"` to hide the
+  plugin's own consent-cookie row: `[lcmt_cookies_table essential="0"]`.
+- Data comes from `Settings::defaultServiceCookies()` (shipped), overridden per
+  service in Settings → Cookie Consent → Services, or supplied for code services
+  via the filter below. See [services.md](services.md) for the resolution order.
+- The admin "Politique de confidentialité" tab shows the shortcode + a live preview.
+
+To attach cookie rows to a **code-registered service**, add a `cookies` key:
+```php
+add_filter('lcmt_dev_consent_services', function (array $services) {
+    $services[] = [
+        'key' => 'hotjar',
+        'name' => 'Hotjar',
+        'category' => 'analytic',
+        'cookies' => [
+            [
+                'name' => '_hjSessionUser_*',
+                'purpose' => 'Stores a unique Hotjar user ID for session replay and heatmaps.',
+                'retention' => '12 months',
+                'issuer' => 'Hotjar',
+                'third_party' => true,
+                'url' => 'https://www.hotjar.com/legal/policies/privacy/',
+            ],
+        ],
+        // … inject_php etc. as usual
+    ];
+    return $services;
+});
+```
+Cookie rows are **server-only** — never exposed in `window.lcmtConsent`.
+
 ## Register a custom service from code
 ```php
 add_filter('lcmt_dev_consent_services', function (array $services) {

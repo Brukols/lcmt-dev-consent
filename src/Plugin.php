@@ -9,8 +9,10 @@ use LcmtDev\Consent\Frontend\Assets;
 use LcmtDev\Consent\Frontend\Banner;
 use LcmtDev\Consent\Frontend\ScriptInjector;
 use LcmtDev\Consent\Frontend\YouTubeEmbed;
+use LcmtDev\Consent\Frontend\CookieTable;
 use LcmtDev\Consent\Log\ConsentLog;
 use LcmtDev\Consent\Log\RestController;
+use LcmtDev\Consent\Services\CookieRegistry;
 use LcmtDev\Consent\Services\ServiceRegistry;
 
 class Plugin
@@ -23,6 +25,7 @@ class Plugin
         $translations->register();
 
         $log = new ConsentLog($settings);
+        $cookies = new CookieRegistry($settings, $registry);
 
         if (is_admin()) {
             (new SettingsPage($settings, $registry, $translations, $log))->register();
@@ -44,5 +47,6 @@ class Plugin
         (new Banner($settings, $registry, $translations))->register();
         (new ScriptInjector($settings, $registry))->register();
         (new YouTubeEmbed())->register();
+        (new CookieTable($cookies, $translations))->register();
     }
 }

@@ -82,9 +82,36 @@ Developers register additional services with `add_filter('lcmt_dev_consent_servi
 
 Filter-registered services appear as a **read-only table** on the Services admin tab (under "Services registered via code") — cannot be edited from the UI. Their category must either be a default (`api|analytic|ads`) or a custom category the admin has added via the Categories tab, otherwise the banner won't render them under any section.
 
+## Cookie metadata (CNIL cookie table)
+
+Per-cookie data powers the `[lcmt_cookies_table]` shortcode (see
+[extending.md](extending.md)) and the "Politique de confidentialité" admin tab.
+**Server-only — never sent to `window.lcmtConsent`.**
+
+- A cookie row = `['name','purpose','retention','issuer','third_party'(bool),'url']`.
+  `purpose` is a full descriptive sentence (English source, localized via `.mo`).
+- **Shipped defaults:** [`Settings::defaultServiceCookies()`](../src/Admin/Settings.php)
+  keyed by service key (GA4, GTM, Facebook, Matomo, YouTube + the 4 Consent-Mode
+  signal services).
+- **Admin overrides:** stored in the `service_cookies` option key, edited via the
+  repeatable per-service editor on the Services tab.
+- **Code services:** supply rows via a `cookies` key on the `lcmt_dev_consent_services`
+  filter (carried on `Service::$cookies`).
+- **Resolution** ([`Services/CookieRegistry.php`](../src/Services/CookieRegistry.php)):
+  `forService()` = admin override → shipped default → filter cookies, each row
+  normalized (`normalizeRow()` trims, casts `third_party`, blanks non-http URLs).
+  `allRows(bool $includeEssential=true)` flattens the enabled services
+  (`ServiceRegistry::all()`), attaching the service display name, and prepends
+  `essentialRow()` (the plugin's own `cookieConsent` cookie, first-party,
+  retention from `cookie_lifetime_days`).
+- **Rendering:** [`Frontend/CookieTable.php`](../src/Frontend/CookieTable.php) —
+  `[lcmt_cookies_table]` (attr `essential="0"` hides the essential row); emits a
+  scoped `<style>` once per request.
+
 ## Service value object
 [`Service.php`](../src/Services/Service.php) holds:
 - `key`, `name`, `description`, `category`, `uri`
+- `cookies` — array of cookie-metadata rows (from the filter args); server-only, used by the cookie table. Default `[]`.
 - `data` — array passed to both client and server injectors (e.g. `['id' => 'GTM-XXXXXXX']`)
 - `needReload` — when true, the banner reloads after commit instead of running the client injector
 - `injectPhp` — PHP callable for server-side wp_head injection

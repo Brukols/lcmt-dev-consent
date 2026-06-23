@@ -103,6 +103,7 @@ class Settings
             'consent_version' => 0,
             'log_enabled' => true,
             'log_retention_months' => 36,
+            'service_cookies' => [],
             'custom_css' => '',
         ];
     }
@@ -142,6 +143,54 @@ class Settings
                 'description' => 'Used to embed videos hosted on YouTube. Accepting allows YouTube/Google to set cookies on your device.',
                 'uri' => 'https://policies.google.com/privacy',
                 'id_fields' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Curated, accurate default cookie metadata per service for the CNIL cookie
+     * table. Purposes are full descriptive sentences (English source strings,
+     * localized via the .mo). Admin overrides live in the `service_cookies`
+     * option key; code services supply their own via the services filter.
+     *
+     * @return array<string,array<int,array<string,mixed>>>
+     */
+    public static function defaultServiceCookies(): array
+    {
+        $google = 'https://policies.google.com/privacy';
+        return [
+            'googleanalytics' => [
+                ['name' => '_ga', 'purpose' => 'Registers a unique ID used to generate statistical data on how the visitor uses the site.', 'retention' => '13 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+                ['name' => '_gat (or _dc_gtm_<property-id>)', 'purpose' => 'Used to throttle the request rate to Google Analytics.', 'retention' => '1 minute', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+                ['name' => '_gid', 'purpose' => 'Used to distinguish users.', 'retention' => '1 day', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+                ['name' => '_ga_<container-id>', 'purpose' => 'Persists session state for Google Analytics 4.', 'retention' => '13 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+            ],
+            'googletagmanager' => [
+                ['name' => '_dc_gtm_<property-id>', 'purpose' => 'Used to throttle the request rate to scripts loaded through Google Tag Manager.', 'retention' => '1 minute', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+            ],
+            'facebookpixel' => [
+                ['name' => '_fbp', 'purpose' => 'Used by Meta to deliver and measure advertising and to identify the visitor\'s browser across sites.', 'retention' => '3 months', 'issuer' => 'Meta', 'third_party' => true, 'url' => 'https://www.facebook.com/policy.php'],
+                ['name' => '_fbc', 'purpose' => 'Stores the last advertising click to attribute conversions for Meta advertising.', 'retention' => '3 months', 'issuer' => 'Meta', 'third_party' => true, 'url' => 'https://www.facebook.com/policy.php'],
+            ],
+            'matomo' => [
+                ['name' => '_pk_id', 'purpose' => 'Stores a unique visitor ID used to generate site usage statistics.', 'retention' => '13 months', 'issuer' => 'Matomo', 'third_party' => false, 'url' => 'https://matomo.org/privacy-policy/'],
+                ['name' => '_pk_ses', 'purpose' => 'Stores temporary session data used to group a visitor\'s actions during a visit.', 'retention' => '30 minutes', 'issuer' => 'Matomo', 'third_party' => false, 'url' => 'https://matomo.org/privacy-policy/'],
+            ],
+            'youtube' => [
+                ['name' => 'VISITOR_INFO1_LIVE', 'purpose' => 'Estimates the visitor\'s bandwidth on pages that embed YouTube videos.', 'retention' => '6 months', 'issuer' => 'Google (YouTube)', 'third_party' => true, 'url' => $google],
+                ['name' => 'YSC', 'purpose' => 'Stores a unique ID to keep statistics of the YouTube videos the visitor has seen.', 'retention' => 'Session', 'issuer' => 'Google (YouTube)', 'third_party' => true, 'url' => $google],
+            ],
+            'google_analytics_storage' => [
+                ['name' => '_ga', 'purpose' => 'Registers a unique ID used to generate statistical data on how the visitor uses the site.', 'retention' => '13 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+            ],
+            'google_ad_storage' => [
+                ['name' => '_gcl_au', 'purpose' => 'Stores and tracks ad conversions for Google advertising services.', 'retention' => '3 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+            ],
+            'google_ad_user_data' => [
+                ['name' => 'IDE', 'purpose' => 'Used by Google to measure and personalize advertising based on user data.', 'retention' => '13 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+            ],
+            'google_ad_personalization' => [
+                ['name' => 'NID', 'purpose' => 'Stores preferences used to personalize Google advertising.', 'retention' => '6 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
             ],
         ];
     }

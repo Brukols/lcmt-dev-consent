@@ -16,6 +16,12 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
 | `consent_log` | `tab_consent_log()` | `log_enabled`, `log_retention_months` + read-only record browser (paginated/filterable) + CSV export button |
+| `privacy` | `tab_privacy()` | Read-only: `[lcmt_cookies_table]` shortcode + copy button + live preview (no settings saved) |
+
+The **Services** tab also renders a per-service repeatable **cookie editor** (one
+`<details>` per predefined service) writing `lcmt[service_cookies][<key>][<i>][…]`;
+sanitized by `SettingsPage::sanitizeServiceCookies()` and returned alongside
+`services` from the `services` branch of `sanitizeForTab()`.
 
 ## Per-tab save — CRITICAL
 The form includes a hidden `<input name="lcmt_tab" value="{current-tab}">`. On save, `handleSave()` dispatches to `sanitizeForTab($tab, $input)` which returns **only the slice of settings belonging to that tab**. This partial array is then merged on top of existing settings via `Settings::save()` (which calls `array_replace_recursive`).
@@ -60,6 +66,7 @@ Single autoloaded row: `lcmt_dev_consent_settings`. Defaults live in [`Settings:
     'consent_version' => 0,
     'log_enabled' => true,            // consent_log tab — record consent events server-side
     'log_retention_months' => 36,     // consent_log tab — daily cron purges older rows (1-120)
+    'service_cookies' => [],          // services tab — admin overrides: map<service_key, cookie_row[]>
     'custom_css' => '',
 ]
 ```
