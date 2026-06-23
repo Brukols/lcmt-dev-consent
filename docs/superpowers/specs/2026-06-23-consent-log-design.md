@@ -72,11 +72,15 @@ Deliberately **no IP, no user-agent, no identity**.
 1. Banner TS generates (or reads from the cookie) the `consent_id`.
 2. On accept / reject / save / withdraw, the TS:
    - writes the existing `key=value!` service pairs to the cookie **plus** `cid=<uuid>`;
-   - `fetch()`es `POST /wp-json/lcmt-dev-consent/v1/log` with
-     `{ event, choices, policy_version, consent_id }` and a WP REST nonce.
-3. Server (`RestController`) validates payload + nonce, **re-derives**
-   `policy_version` server-side (never trusts the client value), and inserts a row
-   via `ConsentLog::insert()`.
+   - `fetch()`es `POST /wp-json/lcmt-dev-consent/v1/log` with **only** `{ event }`
+     and a WP REST nonce.
+3. Server (`RestController`) validates the `event` + nonce, then derives every
+   other field server-side for integrity — it never trusts the request body for
+   them: `consent_id` and `choices` are read from the consent **cookie** sent with
+   the request, `policy_version` is re-computed from current settings, and
+   `cookie_version` from `consent_version`. It then inserts a row via
+   `ConsentLog::insert()`. (Only `event` cannot be inferred from the cookie, so it
+   is the sole body field.)
 
 Logging is **best-effort**: the user's consent choice is applied client-side
 regardless of whether the request succeeds (see Error handling).
