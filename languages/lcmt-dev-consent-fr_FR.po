@@ -1,0 +1,296 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: LCMT Dev — Consent 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-23 00:00+0000\n"
+"PO-Revision-Date: 2026-04-23 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: lcmt-dev-consent\n"
+
+# Banner — default user-facing strings (Settings defaults)
+msgid "Cookies and personal data"
+msgstr "Cookies et données personnelles"
+
+msgid "This site uses cookies to improve your navigation performance. Some of these cookies require your consent and others are used on the basis of our legitimate interest for our website."
+msgstr "Ce site utilise des cookies pour améliorer les performances de votre navigation. Certains de ces cookies nécessitent votre consentement, d'autres sont utilisés sur la base de notre intérêt légitime pour notre site web."
+
+msgid "I accept"
+msgstr "J'accepte"
+
+msgid "I refuse"
+msgstr "Je refuse"
+
+msgid "I personalize"
+msgstr "Je personnalise"
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "Ok"
+msgstr "Ok"
+
+msgid "Accept"
+msgstr "Accepter"
+
+msgid "Refuse"
+msgstr "Refuser"
+
+msgid "All accept"
+msgstr "Tout accepter"
+
+msgid "All refuse"
+msgstr "Tout refuser"
+
+msgid "Cookies management panel"
+msgstr "Panneau de gestion des cookies"
+
+msgid "Learn more"
+msgstr "En savoir plus"
+
+# Categories — default names + descriptions
+msgid "APIs"
+msgstr "APIs"
+
+msgid "APIs allow scripts to be loaded: geolocation, search engines, translations, etc."
+msgstr "Les APIs permettent de charger des scripts : géolocalisation, moteurs de recherche, traductions, etc."
+
+msgid "Audience measurement"
+msgstr "Mesure d'audience"
+
+msgid "Audience-measurement cookies generate statistics about site traffic and usage. This data helps us improve the site."
+msgstr "Les cookies de mesure d'audience permettent de générer des statistiques de fréquentation et d'utilisation de ce site. Ces données nous aident à améliorer le contenu de notre site."
+
+msgid "Advertising"
+msgstr "Règles publicitaires"
+
+msgid "Advertising cookies allow targeted ads to be served."
+msgstr "Les cookies publicitaires permettent de proposer des publicités ciblées."
+
+# Admin UI
+msgid "Cookie Consent"
+msgstr "Consentement cookies"
+
+msgid "General"
+msgstr "Général"
+
+msgid "Appearance"
+msgstr "Apparence"
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Categories"
+msgstr "Catégories"
+
+msgid "Advanced"
+msgstr "Avancé"
+
+msgid "Save changes"
+msgstr "Enregistrer les modifications"
+
+msgid "Settings saved."
+msgstr "Réglages enregistrés."
+
+msgid "All user consents have been reset."
+msgstr "Tous les consentements utilisateurs ont été réinitialisés."
+
+msgid "Enable banner"
+msgstr "Activer la bannière"
+
+msgid "Show the consent banner to visitors"
+msgstr "Afficher la bannière de consentement aux visiteurs"
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Bottom left"
+msgstr "Bas gauche"
+
+msgid "Bottom right"
+msgstr "Bas droit"
+
+msgid "Bottom center"
+msgstr "Bas centre"
+
+msgid "Top center"
+msgstr "Haut centre"
+
+msgid "Banner title"
+msgstr "Titre de la bannière"
+
+msgid "Banner description"
+msgstr "Description de la bannière"
+
+msgid "Privacy policy URL"
+msgstr "URL de la politique de confidentialité"
+
+msgid "Button labels"
+msgstr "Libellés des boutons"
+
+msgid "Per-service accept"
+msgstr "Accepter (par service)"
+
+msgid "Per-service refuse"
+msgstr "Refuser (par service)"
+
+msgid "Panel title"
+msgstr "Titre du panneau"
+
+msgid "Button background"
+msgstr "Arrière-plan des boutons"
+
+msgid "Button text"
+msgstr "Texte des boutons"
+
+msgid "Hover / accent background"
+msgstr "Arrière-plan survol / accent"
+
+msgid "Hover / accent text"
+msgstr "Texte survol / accent"
+
+msgid "Border"
+msgstr "Bordure"
+
+msgid "Border radius (px)"
+msgstr "Rayon de bordure (px)"
+
+msgid "Z-index"
+msgstr "Z-index"
+
+msgid "Predefined services"
+msgstr "Services prédéfinis"
+
+msgid "Service"
+msgstr "Service"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "Display name override"
+msgstr "Nom d'affichage personnalisé"
+
+msgid "Privacy policy"
+msgstr "Politique de confidentialité"
+
+msgid "Services registered via code"
+msgstr "Services enregistrés par code"
+
+msgid "Registered through the lcmt_dev_consent_services filter. Edit them in code."
+msgstr "Enregistrés via le filtre lcmt_dev_consent_services. Modifiez-les dans le code."
+
+msgid "Key"
+msgstr "Clé"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Default categories can be renamed. Add custom categories for services registered via code."
+msgstr "Les catégories par défaut peuvent être renommées. Ajoutez des catégories personnalisées pour les services enregistrés par code."
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Add a custom category"
+msgstr "Ajouter une catégorie personnalisée"
+
+msgid "Key (lowercase, no spaces)"
+msgstr "Clé (minuscules, sans espaces)"
+
+msgid "Cookie name"
+msgstr "Nom du cookie"
+
+msgid "Cookie lifetime (days)"
+msgstr "Durée de vie du cookie (jours)"
+
+msgid "Reset all user consents"
+msgstr "Réinitialiser tous les consentements"
+
+msgid "Every visitor will see the banner again. Continue?"
+msgstr "Chaque visiteur reverra la bannière. Continuer ?"
+
+msgid "Reset now"
+msgstr "Réinitialiser"
+
+msgid "Current version: v%d"
+msgstr "Version actuelle : v%d"
+
+msgid "Custom CSS"
+msgstr "CSS personnalisé"
+
+msgid "Appended after the plugin stylesheet. Use to override any visual detail."
+msgstr "Ajouté après la feuille de style du plugin. Utilisez-le pour remplacer n'importe quel détail visuel."
+
+msgid "OK"
+msgstr "OK"
+
+# Predefined service descriptions
+msgid "Tag container used to load analytics and advertising scripts."
+msgstr "Conteneur de tags utilisé pour charger des scripts d'analyse et de publicité."
+
+msgid "Used to generate site-traffic statistics."
+msgstr "Utilisé pour générer des statistiques de fréquentation du site."
+
+msgid "Used to track user actions on Facebook."
+msgstr "Utilisé pour suivre les actions des utilisateurs sur Facebook."
+
+msgid "Used to track user actions on the site."
+msgstr "Utilisé pour suivre les actions des utilisateurs sur le site."
+
+# Google Consent Mode v2 virtual services
+msgid "Google analytics storage"
+msgstr "Stockage analytique (Google)"
+
+msgid "Used to store and access cookies for analytics purposes, to measure site activity and performance."
+msgstr "Utilisé pour stocker et accéder aux cookies à des fins d'analyse, permettant de mesurer l'activité et la performance du site."
+
+msgid "Google ad storage"
+msgstr "Stockage publicitaire (Google)"
+
+msgid "Used to store and access cookies for advertising purposes, such as conversion tracking and remarketing."
+msgstr "Utilisé pour stocker et accéder aux cookies à des fins publicitaires, comme le suivi des conversions et le remarketing."
+
+msgid "Google ad user data"
+msgstr "Données utilisateur publicitaires (Google)"
+
+msgid "Used to send user data to Google to improve ad relevance."
+msgstr "Utilisé pour envoyer des données utilisateur à Google pour améliorer la pertinence des annonces."
+
+msgid "Google ad personalization"
+msgstr "Personnalisation des annonces (Google)"
+
+msgid "Used to store cookies enabling ad personalization based on past user interactions."
+msgstr "Utilisé pour stocker des cookies permettant la personnalisation des annonces en fonction des interactions passées de l'utilisateur."
+
+msgid "Use Google Consent Mode v2"
+msgstr "Utiliser Google Consent Mode v2"
+
+msgid "When enabled, GTM loads on every page with all 4 consent signals denied by default. The banner shows 4 individual toggles (analytics_storage, ad_storage, ad_user_data, ad_personalization) instead of one GTM toggle."
+msgstr "Lorsqu'activé, GTM se charge sur chaque page avec les 4 signaux de consentement refusés par défaut. La bannière affiche 4 bascules individuelles (analytics_storage, ad_storage, ad_user_data, ad_personalization) à la place d'une seule bascule GTM."
+
+# YouTube service + placeholder
+msgid "Used to embed videos hosted on YouTube. Accepting allows YouTube/Google to set cookies on your device."
+msgstr "Utilisé pour intégrer des vidéos hébergées sur YouTube. Accepter permet à YouTube/Google de déposer des cookies sur votre appareil."
+
+msgid "This content is hosted on YouTube"
+msgstr "Ce contenu est hébergé sur YouTube"
+
+msgid "Loading it will set cookies from YouTube/Google. Accept to play the video."
+msgstr "Le charger déposera des cookies de YouTube/Google. Acceptez pour lire la vidéo."
+
+msgid "Accept and play"
+msgstr "Accepter et lire"
+
+msgid "YouTube video player"
+msgstr "Lecteur vidéo YouTube"

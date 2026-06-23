@@ -1,0 +1,293 @@
+:root {
+    --lcmt-consent-bg: #ffffff;
+    --lcmt-consent-text: #000000;
+    --lcmt-consent-hover-bg: #ffeb3b;
+    --lcmt-consent-hover-text: #000000;
+    --lcmt-consent-border: #000000;
+    --lcmt-consent-radius: 0px;
+    --lcmt-consent-z: 1001;
+}
+
+.lcmt-consent {
+    position: fixed;
+    max-width: 90%;
+    width: 450px;
+    max-height: calc(100vh - 40px);
+    background: var(--lcmt-consent-bg);
+    color: var(--lcmt-consent-text);
+    border: 1px solid var(--lcmt-consent-border);
+    border-radius: var(--lcmt-consent-radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    z-index: var(--lcmt-consent-z);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    overflow: hidden;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    &[data-opened="true"] {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    &--bottom-left {
+        bottom: 20px;
+        left: 20px;
+    }
+    &--bottom-right {
+        bottom: 20px;
+        right: 20px;
+    }
+    &--bottom-center {
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    &--top-center {
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    &__view {
+        display: none;
+        flex-direction: column;
+        min-height: 0; // lets the body shrink so overflow-y:auto actually scrolls
+        flex: 1 1 auto;
+        &[data-opened="true"] {
+            display: flex;
+        }
+    }
+
+    &__body {
+        padding: 20px;
+        overflow-y: auto;
+        min-height: 0;
+        flex: 1 1 auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    &__title {
+        font-weight: 700;
+        font-size: 18px;
+        margin: 0 0 8px;
+    }
+
+    &__desc {
+        margin: 0;
+        font-size: 15px;
+
+        a {
+            color: inherit;
+            text-decoration: underline;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        border-top: 1px solid var(--lcmt-consent-border);
+        flex-shrink: 0;
+    }
+
+    &__btn {
+        flex: 1;
+        padding: 14px 10px;
+        font-size: 14px;
+        font-weight: 700;
+        background: transparent;
+        color: inherit;
+        border: 0;
+        border-right: 1px solid var(--lcmt-consent-border);
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        font-family: inherit;
+        text-align: center;
+
+        &:last-child {
+            border-right: 0;
+        }
+
+        &:hover {
+            background: var(--lcmt-consent-hover-bg) !important;
+            color: var(--lcmt-consent-hover-text) !important;
+        }
+
+        // Reversed colors so the accept button stands out at a glance.
+        // `!important` defeats theme reset rules (e.g. `button { background-color: transparent }`).
+        &--primary {
+            background: var(--lcmt-consent-hover-bg) !important;
+            color: var(--lcmt-consent-hover-text) !important;
+
+            &:hover {
+                background: var(--lcmt-consent-bg) !important;
+                color: var(--lcmt-consent-text) !important;
+            }
+        }
+    }
+
+    &__quick {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-bottom: 12px;
+    }
+
+    &__chip {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border: 1px solid var(--lcmt-consent-border);
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font-family: inherit;
+
+        &:hover {
+            background: var(--lcmt-consent-hover-bg) !important;
+            color: var(--lcmt-consent-hover-text) !important;
+        }
+    }
+
+    &__category {
+        border-top: 1px solid var(--lcmt-consent-border);
+        padding-top: 12px;
+        margin-top: 12px;
+
+        &:first-child {
+            border-top: 0;
+            padding-top: 0;
+            margin-top: 0;
+        }
+    }
+
+    &__cat-name {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        text-transform: uppercase;
+    }
+
+    &__cat-desc {
+        font-size: 13px;
+        margin: 0 0 8px;
+        opacity: 0.85;
+    }
+
+    &__service {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    &__svc-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__svc-name {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    &__svc-desc {
+        font-size: 13px;
+        margin: 2px 0 0;
+        opacity: 0.8;
+        line-height: 1.4;
+    }
+
+    &__svc-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    &__svc-btn {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border: 1px solid var(--lcmt-consent-border);
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        min-width: 80px;
+        font-family: inherit;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &[aria-selected="true"] {
+            background: var(--lcmt-consent-text) !important;
+            color: var(--lcmt-consent-bg) !important;
+        }
+
+        &:hover {
+            background: var(--lcmt-consent-hover-bg) !important;
+            color: var(--lcmt-consent-hover-text) !important;
+        }
+    }
+
+    @media (max-width: 600px) {
+        // Mobile keeps the previous (smaller) sizing — desktop got bumped to
+        // be more readable, but on small viewports the original sizes fit
+        // better and were already deemed comfortable.
+        font-size: 14px;
+
+        &__title {
+            font-size: 16px;
+        }
+        &__desc {
+            font-size: 13px;
+        }
+        &__btn {
+            padding: 12px 8px;
+            font-size: 12px;
+        }
+        &__chip {
+            font-size: 11px;
+            padding: 4px 10px;
+        }
+        &__cat-name {
+            font-size: 13px;
+        }
+        &__cat-desc {
+            font-size: 12px;
+        }
+        &__svc-name {
+            font-size: 13px;
+        }
+        &__svc-desc {
+            font-size: 11px;
+            line-height: 1.35;
+        }
+        &__svc-btn {
+            font-size: 10px;
+            padding: 4px 12px;
+            min-width: 70px;
+        }
+
+        &__service {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        &__svc-actions {
+            width: 100%;
+        }
+        &__svc-btn {
+            flex: 1;
+        }
+    }
+}

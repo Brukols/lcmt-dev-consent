@@ -1,0 +1,92 @@
+# Services — predefined, filter-registered, Consent Mode v2
+
+## Predefined services (admin UI)
+Declared in [`Settings::predefinedServiceMeta()`](../src/Admin/Settings.php):
+
+| Key | Default category | ID fields | Client injector | Server injector |
+|-----|------------------|-----------|-----------------|-----------------|
+| `googletagmanager` | api | `id` (GTM-XXXXXXX) | yes | yes (skipped when Consent Mode v2 is on) |
+| `googleanalytics` | analytic | `id` (G-XXXXXXXXX) | yes | yes |
+| `facebookpixel` | ads | `id` (Pixel ID) | yes | yes |
+| `matomo` | analytic | `url`, `site_id` | yes | yes |
+| `youtube` | api | none | n/a | n/a (no global script — see [`YouTubeEmbed`](../src/Frontend/YouTubeEmbed.php)) |
+
+Each predefined service has:
+- A built-in PHP injector in [`ServiceRegistry::builtinInjectPhp()`](../src/Services/ServiceRegistry.php) that returns a `<script>…</script>` string on every request where the cookie has this service at `=true`.
+- A built-in TypeScript injector in [`assets/src/injectors.ts`](../assets/src/injectors.ts) that fires once when the user first accepts (same session, no reload needed).
+
+## Service resolution
+`ServiceRegistry::all()` produces the effective list:
+1. UI-configured services: one entry per admin-enabled service with non-empty required ID(s).
+2. Consent Mode v2 virtual services (see below): added when GTM has `consent_mode` = true.
+3. Filter-registered services: `apply_filters('lcmt_dev_consent_services', [])`. Skipped if the key is already present from step 1/2 (UI/built-in wins, so code can register defaults the admin is allowed to override).
+
+Result is cached on the instance.
+
+## Google Consent Mode v2 flow
+
+Triggered by the **Use Google Consent Mode v2** checkbox on the GTM row (Services tab). When active:
+
+### 1. GTM is pulled out of the user-facing list
+`ServiceRegistry::all()` skips the `googletagmanager` key when building UI services. GTM won't show up as a banner toggle; it always loads.
+
+### 2. Virtual services are added
+Four synthetic services are injected (see `Settings::consentModeServices()`):
+
+| Service key | Google signal | Category |
+|-------------|---------------|----------|
+| `google_analytics_storage` | `analytics_storage` | analytic |
+| `google_ad_storage` | `ad_storage` | ads |
+| `google_ad_user_data` | `ad_user_data` | ads |
+| `google_ad_personalization` | `ad_personalization` | ads |
+
+Each has a name + description that run through the translation layer (English defaults + French translations in `.po`/`.mo`).
+
+### 3. Server-side snippet (wp_head, priority 1)
+`ScriptInjector::emitConsentModeSnippet()` emits, on every request:
+```html
+<script>
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+    gtag('consent', 'default', {
+        analytics_storage: "<granted|denied from cookie>",
+        ad_storage: "<granted|denied from cookie>",
+        ad_user_data: "<granted|denied from cookie>",
+        ad_personalization: "<granted|denied from cookie>",
+    });
+</script>
+<script>/* GTM loader for the configured GTM ID */</script>
+```
+All 4 signals default to `"denied"` if the cookie isn't set yet. Returning visitors get `"granted"` values straight from the initial call, so GTM never sees a denied→granted flip on the server render.
+
+### 4. Client-side accept (first visit)
+`assets/src/injectors.ts` defines 4 entries that call `window.gtag('consent', 'update', { <signal>: 'granted' })`. The `gtag` global was defined in step 3, so GTM reacts live to the update — no reload required.
+
+### Turning Consent Mode v2 OFF
+If the admin unchecks the box, `isGtmConsentMode()` returns false. GTM becomes a normal per-service toggle again: the built-in injector in `ServiceRegistry::builtinInjectPhp('googletagmanager')` takes over, and the 4 virtual services disappear. The default server-side snippet is not emitted.
+
+## YouTube — per-embed gating
+
+Unlike the analytics services, `youtube` has no single global script. Each embed is its own iframe instance, so consent is enforced per-embed via [`Frontend\YouTubeEmbed`](../src/Frontend/YouTubeEmbed.php). It hooks:
+
+- `wp_oembed_get_html` — replaces the iframe for any `youtube.com` / `youtu.be` / `youtube-nocookie.com` URL when consent is missing.
+- `render_block` (`core/embed` with `providerNameSlug: youtube|youtube-shorts`, plus legacy `core-embed/youtube`).
+- `YouTubeEmbed::render($urlOrId)` — public static helper for theme/plugin code (used by the Air Sceno theme's product page).
+
+When consent IS granted, all three return the real `<iframe>` server-side; no client-side JS runs. When consent is missing, they return a styled placeholder with `data-lcmt-youtube-id="…"` and an "Accept and play" button. The placeholder is upgraded by [`assets/src/youtube.ts`](../assets/src/youtube.ts), enqueued only when `youtube` service is enabled and not yet accepted (see `Assets::enqueueYoutube()`). One accept upgrades all placeholders on the page via the `lcmt-consent:accepted` event.
+
+If the admin toggles the YouTube service OFF in Settings → Cookie Consent → Services, `YouTubeEmbed` becomes a passthrough — original embeds render unchanged.
+
+## Custom services (via filter)
+Developers register additional services with `add_filter('lcmt_dev_consent_services', fn($services) => $services)`. See [extending.md](extending.md) for the full shape.
+
+Filter-registered services appear as a **read-only table** on the Services admin tab (under "Services registered via code") — cannot be edited from the UI. Their category must either be a default (`api|analytic|ads`) or a custom category the admin has added via the Categories tab, otherwise the banner won't render them under any section.
+
+## Service value object
+[`Service.php`](../src/Services/Service.php) holds:
+- `key`, `name`, `description`, `category`, `uri`
+- `data` — array passed to both client and server injectors (e.g. `['id' => 'GTM-XXXXXXX']`)
+- `needReload` — when true, the banner reloads after commit instead of running the client injector
+- `injectPhp` — PHP callable for server-side wp_head injection
+- `source` — `'ui'` or `'code'`
+- `toClientConfig()` — stripped representation sent to `window.lcmtConsent.services` (no PHP callables)
