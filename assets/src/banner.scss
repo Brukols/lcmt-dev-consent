@@ -87,10 +87,13 @@
     &__desc {
         margin: 0;
         font-size: 15px;
+        line-height: 1.4;
 
         a {
             color: inherit;
             text-decoration: underline;
+            font-size: inherit;
+            line-height: inherit;
         }
     }
 
@@ -183,6 +186,7 @@
         font-size: 13px;
         margin: 0 0 8px;
         opacity: 0.85;
+        line-height: 1.4;
     }
 
     &__service {

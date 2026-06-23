@@ -68,20 +68,48 @@ class SettingsPage
         }
         check_admin_referer(self::NONCE_ACTION);
 
+        $tab = isset($_POST['lcmt_tab']) ? sanitize_key($_POST['lcmt_tab']) : 'general';
+        $notice = 'saved';
+
         if (!empty($_POST['lcmt_action']) && $_POST['lcmt_action'] === 'reset_consents') {
             $this->settings->bumpConsentVersion();
-            add_settings_error(self::PAGE_SLUG, 'reset', __('All user consents have been reset.', 'lcmt-dev-consent'), 'updated');
-            return;
+            $notice = 'reset';
+        } else {
+            $input = wp_unslash($_POST['lcmt'] ?? []);
+            if (!is_array($input)) {
+                $input = [];
+            }
+            $partial = $this->sanitizeForTab($tab, $input);
+            $this->settings->save($partial);
         }
 
-        $input = wp_unslash($_POST['lcmt'] ?? []);
-        if (!is_array($input)) {
-            $input = [];
+        // Post/Redirect/Get with our OWN notice flag. We deliberately avoid
+        // add_settings_error()/settings_errors() and the core `settings-updated`
+        // param: other plugins (e.g. Yoast's settings-changed listener re-echoes
+        // get_settings_errors() globally) and core options-head both re-emit those,
+        // producing a duplicate "Settings saved." notice. Rendering our own notice
+        // from a private flag keeps it to exactly one and avoids resubmit-on-refresh.
+        wp_safe_redirect(add_query_arg(
+            ['page' => self::PAGE_SLUG, 'tab' => $tab, 'lcmt_notice' => $notice],
+            admin_url('options-general.php')
+        ));
+        exit;
+    }
+
+    private function renderNotice(): void
+    {
+        $notice = isset($_GET['lcmt_notice']) ? sanitize_key(wp_unslash($_GET['lcmt_notice'])) : '';
+        $messages = [
+            'saved' => __('Settings saved.', 'lcmt-dev-consent'),
+            'reset' => __('All user consents have been reset.', 'lcmt-dev-consent'),
+        ];
+        if (!isset($messages[$notice])) {
+            return;
         }
-        $tab = isset($_POST['lcmt_tab']) ? sanitize_key($_POST['lcmt_tab']) : 'general';
-        $partial = $this->sanitizeForTab($tab, $input);
-        $this->settings->save($partial);
-        add_settings_error(self::PAGE_SLUG, 'saved', __('Settings saved.', 'lcmt-dev-consent'), 'updated');
+        printf(
+            '<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+            esc_html($messages[$notice])
+        );
     }
 
     /** Sanitize only the slice of settings that belongs to the current tab. */
@@ -195,7 +223,7 @@ class SettingsPage
         ];
         if (!isset($tabs[$tab])) $tab = 'general';
 
-        settings_errors(self::PAGE_SLUG);
+        $this->renderNotice();
         $url = admin_url('options-general.php?page=' . self::PAGE_SLUG);
         ?>
         <div class="wrap">
@@ -231,7 +259,10 @@ class SettingsPage
     private function tab_general(): void
     {
         $s = $this->settings->all();
-        $t = $s['texts'];
+        // Show button/label *values* through the translation layer so the admin
+        // sees the localized default (e.g. "J'accepte") instead of the English
+        // source string — mirrors how Banner::render() displays them to visitors.
+        $textVal = fn(string $key): string => $this->t->get('texts.' . $key);
         $positions = [
             'bottom-left' => __('Bottom left', 'lcmt-dev-consent'),
             'bottom-right' => __('Bottom right', 'lcmt-dev-consent'),
@@ -256,11 +287,11 @@ class SettingsPage
             </tr>
             <tr>
                 <th><?= esc_html__('Banner title', 'lcmt-dev-consent') ?></th>
-                <td><input type="text" class="regular-text" name="lcmt[texts][title]" value="<?= esc_attr($t['title']) ?>"></td>
+                <td><input type="text" class="regular-text" name="lcmt[texts][title]" value="<?= esc_attr($textVal('title')) ?>"></td>
             </tr>
             <tr>
                 <th><?= esc_html__('Banner description', 'lcmt-dev-consent') ?></th>
-                <td><textarea name="lcmt[texts][description]" rows="4" class="large-text"><?= esc_textarea($t['description']) ?></textarea></td>
+                <td><textarea name="lcmt[texts][description]" rows="4" class="large-text"><?= esc_textarea($textVal('description')) ?></textarea></td>
             </tr>
             <tr>
                 <th><?= esc_html__('Privacy policy URL', 'lcmt-dev-consent') ?></th>
@@ -285,7 +316,7 @@ class SettingsPage
             foreach ($labels as $k => $label): ?>
                 <tr>
                     <th><?= esc_html($label) ?></th>
-                    <td><input type="text" class="regular-text" name="lcmt[texts][<?= esc_attr($k) ?>]" value="<?= esc_attr($t[$k] ?? '') ?>"></td>
+                    <td><input type="text" class="regular-text" name="lcmt[texts][<?= esc_attr($k) ?>]" value="<?= esc_attr($textVal($k)) ?>"></td>
                 </tr>
             <?php endforeach; ?>
         </table>
