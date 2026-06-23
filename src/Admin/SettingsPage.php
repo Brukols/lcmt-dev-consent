@@ -56,6 +56,23 @@ class SettingsPage
         <?php
         // Reuse the front-end renderer. Output is escaped internally.
         echo $this->cookieTable()->render([]); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        ?>
+        <hr style="margin:28px 0">
+        <h3><?= esc_html__('Let users manage their cookies', 'lcmt-dev-consent') ?></h3>
+        <p class="description"><?= esc_html__('RGPD Art. 7(3): users must be able to change or withdraw consent as easily as they gave it. Add one of these anywhere (e.g. a footer menu item) to reopen the preferences panel:', 'lcmt-dev-consent') ?></p>
+        <p><strong><?= esc_html__('Shortcode', 'lcmt-dev-consent') ?>:</strong> <code>[lcmt_cookies_settings]</code></p>
+        <p><strong><?= esc_html__('HTML link', 'lcmt-dev-consent') ?>:</strong> <code>&lt;a href="#" class="lcmt-open-consent"&gt;<?= esc_html__('Gérer les cookies', 'lcmt-dev-consent') ?>&lt;/a&gt;</code></p>
+        <p><strong><?= esc_html__('JavaScript', 'lcmt-dev-consent') ?>:</strong> <code>window.lcmtConsent.open()</code></p>
+        <p><strong><?= esc_html__('Menu item', 'lcmt-dev-consent') ?>:</strong> <?= esc_html__('In Appearance → Menus, add a Custom Link with URL', 'lcmt-dev-consent') ?> <code>#cookie-settings</code> <?= esc_html__('and your label.', 'lcmt-dev-consent') ?></p>
+        <p><?= esc_html__('Preview:', 'lcmt-dev-consent') ?> <?php echo $this->reopenButtonPreview(); ?></p>
+        <?php
+    }
+
+    private function reopenButtonPreview(): string
+    {
+        return '<button type="button" class="button lcmt-open-consent">'
+            . esc_html__('Gérer les cookies', 'lcmt-dev-consent')
+            . '</button>';
     }
 
     private function renderCookieEditor(string $serviceKey): void

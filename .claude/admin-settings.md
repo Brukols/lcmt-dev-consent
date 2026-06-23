@@ -16,7 +16,7 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
 | `consent_log` | `tab_consent_log()` | `log_enabled`, `log_retention_months` + read-only record browser (paginated/filterable) + CSV export button |
-| `privacy` | `tab_privacy()` | Read-only: `[lcmt_cookies_table]` shortcode + copy button + live preview (no settings saved) |
+| `privacy` | `tab_privacy()` | Read-only: `[lcmt_cookies_table]` shortcode + copy button + live preview; plus the reopen triggers (`[lcmt_cookies_settings]`, `.lcmt-open-consent` link, `window.lcmtConsent.open()`) with a button preview (no settings saved) |
 
 The **Services** tab also renders a per-service repeatable **cookie editor** (one
 `<details>` per predefined service) writing `lcmt[service_cookies][<key>][<i>][…]`;

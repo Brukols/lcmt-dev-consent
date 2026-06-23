@@ -22,6 +22,36 @@ npm run watch        # dev watch mode
 
 `npm run build` produces `assets/dist/banner.[contenthash:8].{js,css}`, `youtube.[contenthash:8].{js,css}`, and `manifest.json` (used by [`Assets::readManifest()`](../src/Frontend/Assets.php) to resolve hashed filenames at runtime).
 
+## Reopen preferences after a decision ("Gérer les cookies")
+
+RGPD Art. 7(3): decided users can reopen the granular panel on any page, without
+loading the banner bundle until they actually trigger it.
+
+- **Triggers:** any element with class `lcmt-open-consent`, any link whose fragment
+  is `#cookie-settings` (e.g. a Custom Link menu item), the `window.lcmtConsent.open()`
+  JS API, or the `[lcmt_cookies_settings]` shortcode (renders a ready button).
+  Trigger matching (`isReopenTrigger` in `banner.ts` + `isTrigger` in the opener)
+  fires in every loaded state; the opener early-returns once `window.__lcmtBannerReady`
+  so `banner.ts` is the sole handler after the bundle loads (no double-fire).
+- **Decided-state output** ([`Frontend/ConsentReopen.php`](../src/Frontend/ConsentReopen.php)):
+  when consent is complete, `Assets` does NOT enqueue the banner. Instead
+  `ConsentReopen::maybeOutputOpener()` (on `wp_footer`) prints a small inline
+  `<script id="lcmt-consent-opener">` that sets `window.lcmtConsent` (full client
+  config via [`ClientConfig::build()`](../src/Frontend/ClientConfig.php)) +
+  `window.lcmtConsentReopen` (`{panelUrl,cssUrl,jsUrl}`), and binds a delegated
+  click on `.lcmt-open-consent`.
+- **Lazy reopen flow:** first trigger → `fetch` `GET /wp-json/lcmt-dev-consent/v1/panel`
+  (returns `{html}` from [`Banner::buildHtml()`](../src/Frontend/Banner.php),
+  PHP single source of truth) → inject markup + the banner CSS/JS bundle. When
+  `banner.ts` boots it sets `window.lcmtConsent.open` (real impl) + `window.__lcmtBannerReady`,
+  and if `window.__lcmtConsentOpenRequested` is set, opens the panel immediately
+  (`ConsentBanner.openPanel()`, which re-syncs from the cookie). A `loading` guard
+  + `getElementById('lcmt-consent')` check make repeated clicks load assets once.
+- **While pending:** the full banner is present and `banner.ts` provides
+  `window.lcmtConsent.open()` directly — the opener is not output.
+- Changing/withdrawing in the reopened panel runs the existing `commit()` →
+  consent-log event + reload-on-removal, unchanged.
+
 ## Runtime behavior (banner.ts)
 
 On first-time visit (some service at `wait`):

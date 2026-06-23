@@ -34,6 +34,19 @@ Art. 7 / CNIL proof (see [architecture.md](architecture.md) for the full design)
   block the user's choice on it. The endpoint + nonce are exposed in
   `window.lcmtConsent.log` (`{enabled, endpoint, nonce}`).
 
+## Reopen the preferences panel ("Gérer les cookies")
+Required by RGPD Art. 7(3) — let users change/withdraw consent any time. Three
+equivalent triggers, all reopen the granular panel (works even after a decision,
+lazy-loading the banner bundle on first use):
+
+- **Shortcode:** `[lcmt_cookies_settings]` → `<button class="lcmt-open-consent">Gérer les cookies</button>`. Override the label: `[lcmt_cookies_settings label="Préférences cookies"]`.
+- **Any element** with `class="lcmt-open-consent"` (e.g. a footer custom-link menu item): `<a href="#" class="lcmt-open-consent">Gérer les cookies</a>`.
+- **JS API:** `window.lcmtConsent.open()`.
+- **Menu / link URL:** any link whose fragment is `#cookie-settings` (anchor `.hash === '#cookie-settings'`). In Appearance → Menus add a **Custom Link** with URL `#cookie-settings` — no CSS class needed.
+
+See [frontend.md](frontend.md) for the lazy-load mechanism and the
+`GET /wp-json/lcmt-dev-consent/v1/panel` route.
+
 ## Cookie information table (`[lcmt_cookies_table]`)
 Renders a CNIL-style table (Service · Cookie · Purpose · Retention · Issuer) of the
 cookies used by the **enabled** services, for the privacy-policy page.

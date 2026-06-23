@@ -227,11 +227,51 @@ class ConsentBanner {
     private hide(): void {
         this.root.setAttribute("data-opened", "false");
     }
+
+    public openPanel(): void {
+        // Re-sync from the current cookie so the panel reflects saved choices.
+        this.values = this.parseCookie();
+        this.services.forEach((svc) => {
+            if (!this.values.find((v) => v.key === svc.key)) {
+                this.values.push({ key: svc.key, status: "wait" });
+            }
+        });
+        this.values = this.values.filter((v) => this.services.some((s) => s.key === v.key));
+        this.values.forEach((v) => this.updateServiceButtons(v.key, v.status));
+        this.root.setAttribute("data-opened", "true");
+        this.showPanel();
+    }
+}
+
+function isReopenTrigger(target: EventTarget | null): boolean {
+    const el = target as HTMLElement | null;
+    if (!el || !el.closest) return false;
+    if (el.closest(".lcmt-open-consent")) return true;
+    const anchor = el.closest("a") as HTMLAnchorElement | null;
+    return !!anchor && anchor.hash === "#cookie-settings";
 }
 
 function boot() {
     const root = document.getElementById("lcmt-consent");
-    if (root) new ConsentBanner(root);
+    if (!root) return;
+    const banner = new ConsentBanner(root);
+    window.lcmtConsent = window.lcmtConsent || ({} as NonNullable<typeof window.lcmtConsent>);
+    window.lcmtConsent.open = () => banner.openPanel();
+    window.__lcmtBannerReady = true;
+
+    // Open the panel from any trigger (class or #cookie-settings link), in every
+    // state the bundle is loaded — pending banner, or after a lazy reopen.
+    document.addEventListener("click", (e) => {
+        if (isReopenTrigger(e.target)) {
+            e.preventDefault();
+            banner.openPanel();
+        }
+    });
+
+    if (window.__lcmtConsentOpenRequested) {
+        window.__lcmtConsentOpenRequested = false;
+        banner.openPanel();
+    }
 }
 
 if (document.readyState === "loading") {

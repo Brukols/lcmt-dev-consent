@@ -73,6 +73,11 @@ class Banner
         if (!$this->shouldRender()) {
             return;
         }
+        echo $this->buildHtml();
+    }
+
+    public function buildHtml(): string
+    {
         $position = (string) $this->settings->get('position', 'bottom-left');
         $categories = (array) $this->settings->get('categories', []);
         $services = $this->registry->all();
@@ -90,6 +95,7 @@ class Banner
             $description .= ' <a href="' . esc_url($privacyUrl) . '" target="_blank" rel="noopener">' . esc_html__('Learn more', 'lcmt-dev-consent') . '</a>';
         }
 
+        ob_start();
         ?>
         <div id="lcmt-consent" class="lcmt-consent lcmt-consent--<?= esc_attr($position) ?>" data-opened="false">
             <div id="lcmt-consent-main" class="lcmt-consent__view" data-opened="true">
@@ -147,5 +153,6 @@ class Banner
             </div>
         </div>
         <?php
+        return (string) ob_get_clean();
     }
 }

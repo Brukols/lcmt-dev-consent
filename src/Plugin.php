@@ -10,6 +10,7 @@ use LcmtDev\Consent\Frontend\Banner;
 use LcmtDev\Consent\Frontend\ScriptInjector;
 use LcmtDev\Consent\Frontend\YouTubeEmbed;
 use LcmtDev\Consent\Frontend\CookieTable;
+use LcmtDev\Consent\Frontend\ConsentReopen;
 use LcmtDev\Consent\Log\ConsentLog;
 use LcmtDev\Consent\Log\RestController;
 use LcmtDev\Consent\Services\CookieRegistry;
@@ -48,5 +49,6 @@ class Plugin
         (new ScriptInjector($settings, $registry))->register();
         (new YouTubeEmbed())->register();
         (new CookieTable($cookies, $translations))->register();
+        (new ConsentReopen($settings, $registry, $translations))->register();
     }
 }

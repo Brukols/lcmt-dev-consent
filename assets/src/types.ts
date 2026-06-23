@@ -41,10 +41,13 @@ export interface LcmtConsentConfig {
     categories: Record<string, CategoryConfig>;
     texts: Texts;
     log?: LogConfig;
+    open?: () => void;
 }
 
 declare global {
     interface Window {
         lcmtConsent?: LcmtConsentConfig;
+        __lcmtConsentOpenRequested?: boolean;
+        __lcmtBannerReady?: boolean;
     }
 }

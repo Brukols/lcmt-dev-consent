@@ -5,6 +5,12 @@ require_once __DIR__ . '/../vendor/autoload.php';
 if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
+if (!defined('LCMT_DEV_CONSENT_DIR')) {
+    define('LCMT_DEV_CONSENT_DIR', dirname(__DIR__) . '/');
+}
+if (!defined('LCMT_DEV_CONSENT_URL')) {
+    define('LCMT_DEV_CONSENT_URL', 'https://example.test/wp-content/plugins/lcmt-dev-consent/');
+}
 
 // Mirror the plugin's runtime autoloader so tests load src/ classes.
 spl_autoload_register(function ($class) {

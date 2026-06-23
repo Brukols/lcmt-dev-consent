@@ -451,3 +451,34 @@ msgstr "Utilisé par Google pour mesurer et personnaliser la publicité à parti
 
 msgid "Stores preferences used to personalize Google advertising."
 msgstr "Enregistre les préférences utilisées pour personnaliser la publicité Google."
+
+# Reopen consent ("Gérer les cookies")
+msgid "Gérer les cookies"
+msgstr "Gérer les cookies"
+
+msgid "Let users manage their cookies"
+msgstr "Permettre aux utilisateurs de gérer leurs cookies"
+
+msgid "RGPD Art. 7(3): users must be able to change or withdraw consent as easily as they gave it. Add one of these anywhere (e.g. a footer menu item) to reopen the preferences panel:"
+msgstr "RGPD Art. 7(3) : les utilisateurs doivent pouvoir modifier ou retirer leur consentement aussi facilement qu'ils l'ont donné. Ajoutez l'un de ces éléments où vous voulez (par ex. dans le menu de pied de page) pour rouvrir le panneau de préférences :"
+
+msgid "Shortcode"
+msgstr "Code court"
+
+msgid "HTML link"
+msgstr "Lien HTML"
+
+msgid "JavaScript"
+msgstr "JavaScript"
+
+msgid "Preview:"
+msgstr "Aperçu :"
+
+msgid "Menu item"
+msgstr "Élément de menu"
+
+msgid "In Appearance → Menus, add a Custom Link with URL"
+msgstr "Dans Apparence → Menus, ajoutez un lien personnalisé avec l'URL"
+
+msgid "and your label."
+msgstr "et votre libellé."

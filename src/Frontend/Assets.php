@@ -116,21 +116,7 @@ class Assets
 
     private function clientConfig(): array
     {
-        $services = array_map(fn($s) => $s->toClientConfig(), $this->registry->all());
-        $categories = (array) $this->settings->get('categories', []);
-
-        return [
-            'cookieName' => $this->settings->effectiveCookieName(),
-            'cookieLifetimeDays' => (int) $this->settings->get('cookie_lifetime_days', 365),
-            'services' => array_values($services),
-            'categories' => $categories,
-            'texts' => (array) $this->settings->get('texts', []),
-            'log' => [
-                'enabled' => (bool) $this->settings->get('log_enabled', true),
-                'endpoint' => rest_url(\LcmtDev\Consent\Log\RestController::NAMESPACE . \LcmtDev\Consent\Log\RestController::ROUTE),
-                'nonce' => wp_create_nonce('wp_rest'),
-            ],
-        ];
+        return ClientConfig::build($this->settings, $this->registry);
     }
 
     private function readManifest(): array
