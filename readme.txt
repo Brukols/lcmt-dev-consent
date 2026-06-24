@@ -4,7 +4,7 @@ Tags: cookies, consent, gdpr, privacy, gtm, google analytics
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 
 Lightweight, performance-focused cookie consent banner. JS/CSS are loaded only while consent is pending; accepted services are injected server-side from wp_head afterwards.
@@ -44,6 +44,9 @@ Listen for client-side acceptance (first visit only):
 });`
 
 == Changelog ==
+
+= 1.3.0 =
+* New: configurable title icon on the consent banner + panel — choose a built-in cookie icon (default), the 🍪 emoji, a custom image (media library), or none, from Settings → Cookie Consent → Appearance.
 
 = 1.2.0 =
 * New: Google Maps consent gate — embedded maps are replaced by a consent placeholder until the visitor accepts (mirrors the YouTube gate). Detects raw Google Maps iframes in content/widgets and theme templates via `GoogleMapsEmbed::render()`.
