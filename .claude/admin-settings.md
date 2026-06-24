@@ -11,7 +11,7 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 | Slug | Method | Scope |
 |------|--------|-------|
 | `general` | `tab_general()` | `enabled`, `position`, `privacy_url`, `texts.*` |
-| `appearance` | `tab_appearance()` | `appearance.*` (colors + radius + z-index) |
+| `appearance` | `tab_appearance()` | `appearance.*` (colors + radius + z-index + `title_icon`) |
 | `services` | `tab_services()` | `services.*` (predefined service config + GTM Consent Mode v2 checkbox) |
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
@@ -48,6 +48,8 @@ Single autoloaded row: `lcmt_dev_consent_settings`. Defaults live in [`Settings:
     'appearance' => [
         'bg', 'text', 'hover_bg', 'hover_text', 'border',
         'radius' /* 0-50 */, 'z_index',
+        'title_icon' /* 'icon' (default, inline cookie SVG) | 'emoji' (🍪) | 'custom' (uses title_icon_url) | 'none' — shown before banner + panel titles */,
+        'title_icon_url' /* media URL used when title_icon='custom'; media picker via wp_enqueue_media() */,
     ],
     'services' => [
         'googletagmanager' => ['enabled', 'id', 'category', 'display_name', 'consent_mode'],

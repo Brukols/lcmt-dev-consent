@@ -159,7 +159,28 @@ class SettingsPage
         }
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
+        wp_enqueue_media();
         wp_add_inline_script('wp-color-picker', 'jQuery(function($){$(".lcmt-color").wpColorPicker();});');
+
+        // Title-icon: toggle the custom-image row + open the media library.
+        wp_add_inline_script('wp-color-picker', <<<'JS'
+        jQuery(function ($) {
+            function toggleCustom() {
+                $('.lcmt-title-icon-custom').toggle($('.lcmt-title-icon-select').val() === 'custom');
+            }
+            $(document).on('change', '.lcmt-title-icon-select', toggleCustom);
+            $(document).on('click', '.lcmt-title-icon-choose', function (e) {
+                e.preventDefault();
+                var $row = $(this).closest('.lcmt-title-icon-custom');
+                var frame = wp.media({ title: 'Select icon', multiple: false, library: { type: 'image' } });
+                frame.on('select', function () {
+                    var att = frame.state().get('selection').first().toJSON();
+                    $row.find('.lcmt-title-icon-url').val(att.url);
+                });
+                frame.open();
+            });
+        });
+        JS);
         wp_add_inline_style('wp-color-picker', '
             .lcmt-tabs{margin:20px 0;border-bottom:1px solid #ccd0d4;padding:0}
             .lcmt-tabs a{padding:10px 16px;display:inline-block;text-decoration:none;border:1px solid transparent;border-bottom:0;background:transparent;color:#555}
@@ -285,6 +306,10 @@ class SettingsPage
                     'border' => $this->sanitizeColor($app['border'] ?? '', '#000000'),
                     'radius' => max(0, min(50, (int) ($app['radius'] ?? 0))),
                     'z_index' => max(0, (int) ($app['z_index'] ?? 1001)),
+                    'title_icon' => in_array($app['title_icon'] ?? 'icon', ['none', 'emoji', 'icon', 'custom'], true)
+                        ? $app['title_icon']
+                        : 'icon',
+                    'title_icon_url' => esc_url_raw($app['title_icon_url'] ?? ''),
                 ]];
 
             case 'services':
@@ -534,6 +559,24 @@ class SettingsPage
             <tr>
                 <th><?= esc_html__('Z-index', 'lcmt-dev-consent') ?></th>
                 <td><input type="number" min="0" name="lcmt[appearance][z_index]" value="<?= esc_attr($a['z_index']) ?>"></td>
+            </tr>
+            <tr>
+                <th><?= esc_html__('Title icon', 'lcmt-dev-consent') ?></th>
+                <td>
+                    <?php $icon = $a['title_icon'] ?? 'icon'; $iconUrl = $a['title_icon_url'] ?? ''; ?>
+                    <select name="lcmt[appearance][title_icon]" class="lcmt-title-icon-select">
+                        <option value="icon" <?php selected($icon, 'icon') ?>><?= esc_html__('Cookie icon', 'lcmt-dev-consent') ?></option>
+                        <option value="emoji" <?php selected($icon, 'emoji') ?>><?= esc_html__('Emoji (🍪)', 'lcmt-dev-consent') ?></option>
+                        <option value="custom" <?php selected($icon, 'custom') ?>><?= esc_html__('Custom image', 'lcmt-dev-consent') ?></option>
+                        <option value="none" <?php selected($icon, 'none') ?>><?= esc_html__('None', 'lcmt-dev-consent') ?></option>
+                    </select>
+                    <p class="description"><?= esc_html__('Shown before the banner and panel titles so visitors recognize the cookie consent panel.', 'lcmt-dev-consent') ?></p>
+                    <div class="lcmt-title-icon-custom" style="margin-top:10px;<?= $icon === 'custom' ? '' : 'display:none;' ?>">
+                        <input type="url" class="lcmt-title-icon-url regular-text" name="lcmt[appearance][title_icon_url]" value="<?= esc_attr($iconUrl) ?>" placeholder="https://…/icon.svg">
+                        <button type="button" class="button lcmt-title-icon-choose"><?= esc_html__('Choose image', 'lcmt-dev-consent') ?></button>
+                        <p class="description"><?= esc_html__('Use a small square image (SVG or PNG). Recommended at least 32×32 px.', 'lcmt-dev-consent') ?></p>
+                    </div>
+                </td>
             </tr>
         </table>
         <?php

@@ -163,6 +163,31 @@ msgstr "Rayon de bordure (px)"
 msgid "Z-index"
 msgstr "Z-index"
 
+# Title icon (Appearance tab)
+msgid "Title icon"
+msgstr "Icône du titre"
+
+msgid "Cookie icon"
+msgstr "Icône cookie"
+
+msgid "Emoji (🍪)"
+msgstr "Emoji (🍪)"
+
+msgid "Custom image"
+msgstr "Image personnalisée"
+
+msgid "None"
+msgstr "Aucune"
+
+msgid "Shown before the banner and panel titles so visitors recognize the cookie consent panel."
+msgstr "Affichée avant les titres de la bannière et du panneau pour que les visiteurs reconnaissent le panneau de consentement aux cookies."
+
+msgid "Choose image"
+msgstr "Choisir une image"
+
+msgid "Use a small square image (SVG or PNG). Recommended at least 32×32 px."
+msgstr "Utilisez une petite image carrée (SVG ou PNG). Recommandé au moins 32 × 32 px."
+
 msgid "Predefined services"
 msgstr "Services prédéfinis"
 

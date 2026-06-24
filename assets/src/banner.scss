@@ -84,6 +84,29 @@
         margin: 0 0 8px;
     }
 
+    // Optional cookie indicator before the title (SVG icon, 🍪 emoji, or a
+    // custom image). Decorative only (aria-hidden in markup). Sized a touch
+    // larger than the title text so the cookie reads clearly; the SVG inherits
+    // the title color via currentColor.
+    &__title-icon {
+        display: inline-block;
+        margin-right: 0.45em;
+        vertical-align: -0.2em;
+        line-height: 1;
+        font-size: 1.3em;
+
+        &:is(svg) {
+            width: 1em;
+            height: 1em;
+        }
+
+        &:is(img) {
+            width: auto;
+            height: 1em;
+            object-fit: contain;
+        }
+    }
+
     &__desc {
         margin: 0;
         font-size: 15px;

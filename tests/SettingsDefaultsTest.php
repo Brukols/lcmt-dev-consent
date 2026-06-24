@@ -34,6 +34,13 @@ class SettingsDefaultsTest extends TestCase
         $this->assertSame('Google Maps', $meta['googlemaps']['name']);
     }
 
+    public function test_title_icon_defaults_to_icon(): void
+    {
+        $defaults = Settings::defaults();
+        $this->assertSame('icon', $defaults['appearance']['title_icon']);
+        $this->assertSame('', $defaults['appearance']['title_icon_url']);
+    }
+
     public function test_default_cookies_include_googlemaps(): void
     {
         $all = Settings::defaultServiceCookies();

@@ -76,6 +76,8 @@ class Settings
                 'border' => '#000000',
                 'radius' => 0,
                 'z_index' => 1001,
+                'title_icon' => 'icon',
+                'title_icon_url' => '',
             ],
             'services' => [
                 'googletagmanager' => ['enabled' => false, 'id' => '', 'category' => 'api', 'display_name' => '', 'consent_mode' => false],

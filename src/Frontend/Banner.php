@@ -82,6 +82,7 @@ class Banner
         $categories = (array) $this->settings->get('categories', []);
         $services = $this->registry->all();
         $t = $this->t;
+        $titleIcon = $this->titleIconHtml();
 
         // Group services by category (only those present in categories map)
         $byCategory = [];
@@ -100,7 +101,7 @@ class Banner
         <div id="lcmt-consent" class="lcmt-consent lcmt-consent--<?= esc_attr($position) ?>" data-opened="false">
             <div id="lcmt-consent-main" class="lcmt-consent__view" data-opened="true">
                 <div class="lcmt-consent__body">
-                    <p class="lcmt-consent__title"><?= esc_html($t->get('texts.title')) ?></p>
+                    <p class="lcmt-consent__title"><?= $titleIcon ?><?= esc_html($t->get('texts.title')) ?></p>
                     <p class="lcmt-consent__desc"><?= wp_kses_post($description) ?></p>
                 </div>
                 <div class="lcmt-consent__actions">
@@ -111,7 +112,7 @@ class Banner
             </div>
             <div id="lcmt-consent-panel" class="lcmt-consent__view" data-opened="false">
                 <div class="lcmt-consent__body">
-                    <p class="lcmt-consent__title"><?= esc_html($t->get('texts.panel_title')) ?></p>
+                    <p class="lcmt-consent__title"><?= $titleIcon ?><?= esc_html($t->get('texts.panel_title')) ?></p>
                     <div class="lcmt-consent__quick">
                         <button type="button" class="lcmt-consent__chip lcmt-consent__accept-all"><?= esc_html($t->get('texts.all_accept')) ?></button>
                         <button type="button" class="lcmt-consent__chip lcmt-consent__refuse-all"><?= esc_html($t->get('texts.all_refuse')) ?></button>
@@ -154,5 +155,36 @@ class Banner
         </div>
         <?php
         return (string) ob_get_clean();
+    }
+
+    /**
+     * Optional cookie indicator rendered before the banner + panel titles so
+     * visitors immediately recognize the consent panel. Controlled by the
+     * `appearance.title_icon` setting: 'icon' (inline SVG, default), 'emoji'
+     * (🍪), or 'none'. Always aria-hidden — the title text already conveys it.
+     */
+    private function titleIconHtml(): string
+    {
+        $appearance = $this->settings->all()['appearance'] ?? [];
+        $mode = (string) ($appearance['title_icon'] ?? 'icon');
+        if ($mode === 'none') {
+            return '';
+        }
+        if ($mode === 'emoji') {
+            return '<span class="lcmt-consent__title-icon" aria-hidden="true">🍪</span>';
+        }
+        if ($mode === 'custom') {
+            $url = (string) ($appearance['title_icon_url'] ?? '');
+            if ($url !== '') {
+                return '<img class="lcmt-consent__title-icon" src="' . esc_url($url) . '" alt="" aria-hidden="true">';
+            }
+            // 'custom' selected but no image chosen yet → fall back to the SVG.
+        }
+        // Default: an inline cookie SVG. currentColor + 1em sizing so it follows
+        // the title's color and font-size with no extra assets to load.
+        return '<svg class="lcmt-consent__title-icon" aria-hidden="true" focusable="false" '
+            . 'width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">'
+            . '<path d="M21.95 10.99a1 1 0 0 0-.86-.99 2.5 2.5 0 0 1-2.09-2.09 1 1 0 0 0-.99-.86 2.5 2.5 0 0 1-2.45-3.01A1 1 0 0 0 12 2a10 10 0 1 0 9.95 8.99ZM8 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4 3a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm2.5-5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>'
+            . '</svg>';
     }
 }
