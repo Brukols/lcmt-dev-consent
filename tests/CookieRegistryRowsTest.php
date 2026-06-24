@@ -40,8 +40,8 @@ class CookieRegistryRowsTest extends TestCase
 
     public function test_disabled_service_contributes_no_rows(): void
     {
-        // youtube + googlemaps are enabled by default in Settings::defaults();
-        // disable them too so that no service is active.
+        // Explicitly disable every service so that no service is active,
+        // independent of the shipped defaults.
         $reg = $this->reg(['services' => [
             'googleanalytics' => ['enabled' => false, 'id' => '', 'category' => 'analytic', 'display_name' => ''],
             'youtube' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],

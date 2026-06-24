@@ -17,11 +17,13 @@ class SettingsDefaultsTest extends TestCase
         $this->assertSame(36, $defaults['log_retention_months']);
     }
 
-    public function test_defaults_include_googlemaps_service_enabled(): void
+    public function test_youtube_and_googlemaps_disabled_by_default(): void
     {
         $defaults = Settings::defaults();
+        $this->assertArrayHasKey('youtube', $defaults['services']);
         $this->assertArrayHasKey('googlemaps', $defaults['services']);
-        $this->assertTrue($defaults['services']['googlemaps']['enabled']);
+        $this->assertFalse($defaults['services']['youtube']['enabled']);
+        $this->assertFalse($defaults['services']['googlemaps']['enabled']);
         $this->assertSame('api', $defaults['services']['googlemaps']['category']);
     }
 

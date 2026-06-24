@@ -82,8 +82,8 @@ class Settings
                 'googleanalytics' => ['enabled' => false, 'id' => '', 'category' => 'analytic', 'display_name' => ''],
                 'facebookpixel' => ['enabled' => false, 'id' => '', 'category' => 'ads', 'display_name' => ''],
                 'matomo' => ['enabled' => false, 'url' => '', 'site_id' => '', 'category' => 'analytic', 'display_name' => ''],
-                'youtube' => ['enabled' => true, 'category' => 'api', 'display_name' => ''],
-                'googlemaps' => ['enabled' => true, 'category' => 'api', 'display_name' => ''],
+                'youtube' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
+                'googlemaps' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
             ],
             'categories' => [
                 'api' => [
