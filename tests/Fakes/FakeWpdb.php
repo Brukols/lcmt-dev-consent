@@ -13,6 +13,23 @@ class FakeWpdb
     public array $queries = [];
     public int $deleteReturn = 0;
 
+    /** @var mixed value returned by get_var() */
+    public $varReturn = null;
+    /** @var array value returned by get_results() */
+    public array $resultsReturn = [];
+
+    public function get_var($sql)
+    {
+        $this->queries[] = $sql;
+        return $this->varReturn;
+    }
+
+    public function get_results($sql, $output = null)
+    {
+        $this->queries[] = $sql;
+        return $this->resultsReturn;
+    }
+
     public function insert($table, $data, $formats)
     {
         $this->inserts[] = ['table' => $table, 'data' => $data, 'formats' => $formats];

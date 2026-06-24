@@ -5,6 +5,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
+if (!defined('ARRAY_A')) {
+    define('ARRAY_A', 'ARRAY_A');
+}
 if (!defined('LCMT_DEV_CONSENT_DIR')) {
     define('LCMT_DEV_CONSENT_DIR', dirname(__DIR__) . '/');
 }

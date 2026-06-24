@@ -158,6 +158,16 @@ echo \LcmtDev\Consent\Frontend\YouTubeEmbed::render($urlOrId);
 
 Pasting a YouTube URL into a Gutenberg block or a Classic Editor paragraph works too — `YouTubeEmbed` filters `wp_oembed_get_html` and `render_block` so any YouTube embed on the site is gated automatically. No theme changes needed for editor-driven content.
 
+## Embed a Google Maps map with consent gating
+For consent-aware Google Maps embeds, theme/plugin code can call:
+```php
+echo \LcmtDev\Consent\Frontend\GoogleMapsEmbed::render($embedUrl, $height);
+```
+- Accepts any Google Maps embed URL (`www.google.<tld>/maps/embed?…`, `/maps/d/embed?…`, or `maps.google.com/maps?…&output=embed`); `$height` is optional (default 450).
+- Returns the real `<iframe>` if consent is granted, otherwise a placeholder with an inline "Accept and display" button. Returns an empty string if the URL isn't a recognizable Maps URL.
+
+Pasting a Maps iframe into a Custom HTML block (Gutenberg) or raw HTML (Classic Editor) works too — `GoogleMapsEmbed` filters `the_content` and `widget_text`, so any Google Maps iframe on the site is gated automatically. No theme changes needed for editor-driven content.
+
 ## Adding a new predefined service
 If a service is common enough to warrant first-class admin UI:
 1. Add the defaults entry to `Settings::defaults()['services']` (enabled/id/category/display_name).

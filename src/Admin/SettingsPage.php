@@ -795,19 +795,17 @@ class SettingsPage
                     <th><?= esc_html__('Event', 'lcmt-dev-consent') ?></th>
                     <th><?= esc_html__('Consent ID', 'lcmt-dev-consent') ?></th>
                     <th><?= esc_html__('Choices', 'lcmt-dev-consent') ?></th>
-                    <th><?= esc_html__('Policy', 'lcmt-dev-consent') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($result['rows'])): ?>
-                    <tr><td colspan="5"><?= esc_html__('No records.', 'lcmt-dev-consent') ?></td></tr>
+                    <tr><td colspan="4"><?= esc_html__('No records.', 'lcmt-dev-consent') ?></td></tr>
                 <?php else: foreach ($result['rows'] as $row): ?>
                     <tr>
                         <td><?= esc_html($row['created_at']) ?></td>
                         <td><?= esc_html($row['event']) ?></td>
                         <td><code><?= esc_html($row['consent_id']) ?></code></td>
                         <td><code style="font-size:11px"><?= esc_html($row['choices']) ?></code></td>
-                        <td><code><?= esc_html($row['policy_version']) ?></code></td>
                     </tr>
                 <?php endforeach; endif; ?>
             </tbody>

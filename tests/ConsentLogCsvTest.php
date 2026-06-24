@@ -24,7 +24,7 @@ class ConsentLogCsvTest extends TestCase
         ]);
 
         $lines = array_values(array_filter(explode("\n", trim($csv))));
-        $this->assertSame('id,consent_id,event,choices,policy_version,cookie_version,created_at', $lines[0]);
+        $this->assertSame('id,consent_id,event,choices,cookie_version,created_at', $lines[0]);
         $this->assertStringContainsString('1,abc,accept_all', $lines[1]);
         $this->assertStringContainsString('2026-06-23 10:00:00', $lines[1]);
     }
@@ -33,6 +33,6 @@ class ConsentLogCsvTest extends TestCase
     {
         $log = new ConsentLog(new Settings(), new FakeWpdb());
         $csv = trim($log->exportCsv([]));
-        $this->assertSame('id,consent_id,event,choices,policy_version,cookie_version,created_at', $csv);
+        $this->assertSame('id,consent_id,event,choices,cookie_version,created_at', $csv);
     }
 }

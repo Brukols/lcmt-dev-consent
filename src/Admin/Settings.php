@@ -83,6 +83,7 @@ class Settings
                 'facebookpixel' => ['enabled' => false, 'id' => '', 'category' => 'ads', 'display_name' => ''],
                 'matomo' => ['enabled' => false, 'url' => '', 'site_id' => '', 'category' => 'analytic', 'display_name' => ''],
                 'youtube' => ['enabled' => true, 'category' => 'api', 'display_name' => ''],
+                'googlemaps' => ['enabled' => true, 'category' => 'api', 'display_name' => ''],
             ],
             'categories' => [
                 'api' => [
@@ -144,6 +145,12 @@ class Settings
                 'uri' => 'https://policies.google.com/privacy',
                 'id_fields' => [],
             ],
+            'googlemaps' => [
+                'name' => 'Google Maps',
+                'description' => 'Used to embed interactive maps from Google Maps. Accepting allows Google to set cookies on your device.',
+                'uri' => 'https://policies.google.com/privacy',
+                'id_fields' => [],
+            ],
         ];
     }
 
@@ -179,6 +186,10 @@ class Settings
             'youtube' => [
                 ['name' => 'VISITOR_INFO1_LIVE', 'purpose' => 'Estimates the visitor\'s bandwidth on pages that embed YouTube videos.', 'retention' => '6 months', 'issuer' => 'Google (YouTube)', 'third_party' => true, 'url' => $google],
                 ['name' => 'YSC', 'purpose' => 'Stores a unique ID to keep statistics of the YouTube videos the visitor has seen.', 'retention' => 'Session', 'issuer' => 'Google (YouTube)', 'third_party' => true, 'url' => $google],
+            ],
+            'googlemaps' => [
+                ['name' => 'NID', 'purpose' => 'Stores visitor preferences and information when an embedded Google map is displayed.', 'retention' => '6 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
+                ['name' => 'CONSENT', 'purpose' => 'Records the visitor\'s cookie-consent state for Google services such as embedded maps.', 'retention' => '2 years', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],
             ],
             'google_analytics_storage' => [
                 ['name' => '_ga', 'purpose' => 'Registers a unique ID used to generate statistical data on how the visitor uses the site.', 'retention' => '13 months', 'issuer' => 'Google', 'third_party' => true, 'url' => $google],

@@ -3,11 +3,10 @@
 namespace LcmtDev\Consent\Log;
 
 use LcmtDev\Consent\Admin\Settings;
-use LcmtDev\Consent\Services\ServiceRegistry;
 
 class ConsentLog
 {
-    public const DB_VERSION = '1';
+    public const DB_VERSION = '3';
     public const DB_VERSION_OPTION = 'lcmt_dev_consent_db_version';
     public const TABLE_SUFFIX = 'lcmt_consent_log';
 
@@ -24,26 +23,6 @@ class ConsentLog
         $this->wpdb = $wpdb ?? $GLOBALS['wpdb'];
     }
 
-    public static function hashConfig(array $config): string
-    {
-        return substr(sha1((string) wp_json_encode($config)), 0, 12);
-    }
-
-    public function policyVersion(Settings $settings, ServiceRegistry $registry): string
-    {
-        $services = [];
-        foreach ($registry->all() as $svc) {
-            $services[] = ['key' => $svc->key, 'name' => $svc->name, 'category' => $svc->category];
-        }
-
-        return self::hashConfig([
-            'services' => $services,
-            'texts' => (array) $settings->get('texts', []),
-            'categories' => (array) $settings->get('categories', []),
-            'privacy_url' => (string) $settings->get('privacy_url', ''),
-        ]);
-    }
-
     public function tableName(): string
     {
         return $this->wpdb->prefix . self::TABLE_SUFFIX;
@@ -55,7 +34,6 @@ class ConsentLog
             'consent_id' => '',
             'event' => '',
             'choices' => '',
-            'policy_version' => '',
             'cookie_version' => '',
             'created_at' => gmdate('Y-m-d H:i:s'),
         ], $record);
@@ -66,11 +44,10 @@ class ConsentLog
                 'consent_id' => (string) $row['consent_id'],
                 'event' => (string) $row['event'],
                 'choices' => (string) $row['choices'],
-                'policy_version' => (string) $row['policy_version'],
                 'cookie_version' => (string) $row['cookie_version'],
                 'created_at' => (string) $row['created_at'],
             ],
-            ['%s', '%s', '%s', '%s', '%s', '%s']
+            ['%s', '%s', '%s', '%s', '%s']
         );
 
         return (int) $this->wpdb->insert_id;
@@ -146,7 +123,7 @@ class ConsentLog
 
     public function exportCsv(array $rows): string
     {
-        $columns = ['id', 'consent_id', 'event', 'choices', 'policy_version', 'cookie_version', 'created_at'];
+        $columns = ['id', 'consent_id', 'event', 'choices', 'cookie_version', 'created_at'];
         $fh = fopen('php://temp', 'r+');
         fputcsv($fh, $columns);
         foreach ($rows as $row) {
@@ -172,18 +149,18 @@ class ConsentLog
             consent_id CHAR(36) NOT NULL DEFAULT '',
             event VARCHAR(20) NOT NULL DEFAULT '',
             choices TEXT NULL,
-            policy_version VARCHAR(40) NOT NULL DEFAULT '',
             cookie_version VARCHAR(40) NOT NULL DEFAULT '',
             created_at DATETIME NOT NULL,
             PRIMARY KEY  (id),
             KEY consent_id (consent_id),
             KEY event (event),
-            KEY policy_version (policy_version),
             KEY created_at (created_at)
         ) {$charset};";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+        // Clean up the removed policy-versions layer on upgrade (dbDelta never drops).
+        $this->wpdb->query('DROP TABLE IF EXISTS ' . $this->wpdb->prefix . 'lcmt_consent_policies');
         update_option(self::DB_VERSION_OPTION, self::DB_VERSION);
     }
 

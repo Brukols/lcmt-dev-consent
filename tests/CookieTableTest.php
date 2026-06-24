@@ -58,6 +58,7 @@ class CookieTableTest extends TestCase
             'services' => [
                 'googleanalytics' => ['enabled' => false, 'id' => '', 'category' => 'analytic', 'display_name' => ''],
                 'youtube' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
+                'googlemaps' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
             ],
         ])->render(['essential' => '0']);
         $this->assertSame('', $html);
@@ -69,6 +70,7 @@ class CookieTableTest extends TestCase
             'services' => [
                 'googleanalytics' => ['enabled' => false, 'id' => '', 'category' => 'analytic', 'display_name' => ''],
                 'youtube' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
+                'googlemaps' => ['enabled' => false, 'category' => 'api', 'display_name' => ''],
             ],
             'cookie_lifetime_days' => 365,
         ])->render([]);

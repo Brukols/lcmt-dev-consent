@@ -7,7 +7,8 @@ module.exports = (env, argv) => {
     return {
         entry: {
             banner: "./assets/src/banner.ts",
-            youtube: "./assets/src/youtube.ts"
+            youtube: "./assets/src/youtube.ts",
+            googlemaps: "./assets/src/googlemaps.ts"
         },
         output: {
             path: path.resolve(__dirname, "assets/dist"),

@@ -26,7 +26,6 @@ class ConsentLogDbTest extends TestCase
             'consent_id' => 'abc',
             'event' => 'accept_all',
             'choices' => '{"googleanalytics":true}',
-            'policy_version' => 'deadbeef0001',
             'cookie_version' => '0',
             'created_at' => '2026-06-23 10:00:00',
         ]);

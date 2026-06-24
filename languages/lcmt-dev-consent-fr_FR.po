@@ -295,6 +295,22 @@ msgstr "Accepter et lire"
 msgid "YouTube video player"
 msgstr "Lecteur vidéo YouTube"
 
+# Google Maps service + placeholder
+msgid "Used to embed interactive maps from Google Maps. Accepting allows Google to set cookies on your device."
+msgstr "Utilisé pour intégrer des cartes interactives Google Maps. Accepter permet à Google de déposer des cookies sur votre appareil."
+
+msgid "This content is hosted on Google Maps"
+msgstr "Ce contenu est hébergé sur Google Maps"
+
+msgid "Loading it will set cookies from Google. Accept to display the map."
+msgstr "Le charger déposera des cookies de Google. Acceptez pour afficher la carte."
+
+msgid "Accept and display"
+msgstr "Accepter et afficher"
+
+msgid "Google Maps map"
+msgstr "Carte Google Maps"
+
 # Consent log — "Registre de consentement" tab
 msgid "Registre de consentement"
 msgstr "Registre de consentement"
@@ -442,6 +458,12 @@ msgstr "Estime la bande passante du visiteur sur les pages intégrant des vidéo
 
 msgid "Stores a unique ID to keep statistics of the YouTube videos the visitor has seen."
 msgstr "Enregistre un identifiant unique pour conserver les statistiques des vidéos YouTube vues par le visiteur."
+
+msgid "Stores visitor preferences and information when an embedded Google map is displayed."
+msgstr "Enregistre les préférences et informations du visiteur lorsqu'une carte Google intégrée est affichée."
+
+msgid "Records the visitor's cookie-consent state for Google services such as embedded maps."
+msgstr "Enregistre l'état du consentement aux cookies du visiteur pour les services Google tels que les cartes intégrées."
 
 msgid "Stores and tracks ad conversions for Google advertising services."
 msgstr "Enregistre et suit les conversions publicitaires pour les services publicitaires de Google."

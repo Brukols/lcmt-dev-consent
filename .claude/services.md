@@ -10,6 +10,7 @@ Declared in [`Settings::predefinedServiceMeta()`](../src/Admin/Settings.php):
 | `facebookpixel` | ads | `id` (Pixel ID) | yes | yes |
 | `matomo` | analytic | `url`, `site_id` | yes | yes |
 | `youtube` | api | none | n/a | n/a (no global script — see [`YouTubeEmbed`](../src/Frontend/YouTubeEmbed.php)) |
+| `googlemaps` | api | none | n/a | n/a (no global script — see [`GoogleMapsEmbed`](../src/Frontend/GoogleMapsEmbed.php)) |
 
 Each predefined service has:
 - A built-in PHP injector in [`ServiceRegistry::builtinInjectPhp()`](../src/Services/ServiceRegistry.php) that returns a `<script>…</script>` string on every request where the cookie has this service at `=true`.
@@ -76,6 +77,15 @@ Unlike the analytics services, `youtube` has no single global script. Each embed
 When consent IS granted, all three return the real `<iframe>` server-side; no client-side JS runs. When consent is missing, they return a styled placeholder with `data-lcmt-youtube-id="…"` and an "Accept and play" button. The placeholder is upgraded by [`assets/src/youtube.ts`](../assets/src/youtube.ts), enqueued only when `youtube` service is enabled and not yet accepted (see `Assets::enqueueYoutube()`). One accept upgrades all placeholders on the page via the `lcmt-consent:accepted` event.
 
 If the admin toggles the YouTube service OFF in Settings → Cookie Consent → Services, `YouTubeEmbed` becomes a passthrough — original embeds render unchanged.
+
+## Google Maps — per-embed gating
+
+`googlemaps` works like `youtube` (per-embed, no global script) but with a different detection strategy: **Google Maps is not a WordPress oEmbed/block provider** — maps are pasted as raw `<iframe src="https://www.google.com/maps/embed?…">` (a Custom HTML block in Gutenberg, or raw HTML in the Classic editor). Both end up in the post body, so [`Frontend\GoogleMapsEmbed`](../src/Frontend/GoogleMapsEmbed.php) hooks `the_content` (priority 20, after `do_blocks`/`wpautop`) and `widget_text`, scans the rendered HTML for Google-Maps iframes, and swaps each one.
+
+- Recognized hosts/paths: `www.google.<tld>/maps/...` (incl. `/maps/embed`, `/maps/d/embed`) and `maps.google.com/maps?…&output=embed` (see `GoogleMapsEmbed::isMapsUrl()`). Non-Maps iframes (YouTube, reCAPTCHA, etc.) pass through untouched.
+- `GoogleMapsEmbed::render($src)` — public static helper for theme/plugin code.
+
+When consent IS granted the original iframe passes through (server-side); no client JS runs. When consent is missing each iframe is replaced by a placeholder carrying `data-lcmt-maps-src="…"` + `data-lcmt-maps-height="…"` (the full embed URL and height, so the exact iframe can be rebuilt) and an "Accept and display" button. The placeholder is upgraded by [`assets/src/googlemaps.ts`](../assets/src/googlemaps.ts), enqueued only when `googlemaps` is enabled and not yet accepted (see `Assets::enqueueGooglemaps()`). One accept upgrades all placeholders on the page via the `lcmt-consent:accepted` event. Toggling the service OFF makes the filter a passthrough.
 
 ## Custom services (via filter)
 Developers register additional services with `add_filter('lcmt_dev_consent_services', fn($services) => $services)`. See [extending.md](extending.md) for the full shape.

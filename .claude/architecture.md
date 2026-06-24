@@ -21,13 +21,15 @@ lcmt-dev-consent/
 │   ├── Frontend/
 │   │   ├── Assets.php
 │   │   ├── Banner.php
-│   │   └── ScriptInjector.php
+│   │   ├── ScriptInjector.php
+│   │   ├── YouTubeEmbed.php      # per-embed YouTube consent gate
+│   │   └── GoogleMapsEmbed.php   # per-embed Google Maps consent gate
 │   ├── Admin/
 │   │   ├── SettingsPage.php
 │   │   ├── Settings.php
 │   │   └── Translations.php
 │   ├── Log/
-│   │   ├── ConsentLog.php       # table create/upgrade, insert/query/purge, CSV, policy hash
+│   │   ├── ConsentLog.php       # consent_log table, insert/query/purge, CSV export
 │   │   └── RestController.php   # POST lcmt-dev-consent/v1/log
 │   └── Services/
 │       ├── ServiceRegistry.php
@@ -37,7 +39,9 @@ lcmt-dev-consent/
     │   ├── banner.ts
     │   ├── injectors.ts
     │   ├── types.ts
-    │   └── banner.scss
+    │   ├── banner.scss
+    │   ├── youtube.ts / youtube.scss        # YouTube placeholder upgrader
+    │   └── googlemaps.ts / googlemaps.scss   # Google Maps placeholder upgrader
     └── dist/                     # Committed; shipped to prod
         ├── banner.[hash].js
         ├── banner.[hash].css
@@ -88,9 +92,9 @@ inject, the log is the audit trail.
 
 - **Table:** `{$wpdb->prefix}lcmt_consent_log` — columns `id`, `consent_id`
   (anonymous UUID), `event` (`accept_all|reject_all|custom|withdraw`), `choices`
-  (JSON of service→bool), `policy_version` (12-char hash of the services list +
-  texts + categories + privacy_url shown at the time), `cookie_version`
-  (`consent_version` int), `created_at` (UTC). **No IP / identity stored.**
+  (JSON of service→bool), `cookie_version` (`consent_version` int), `created_at`
+  (UTC). **No IP / identity stored.** DB schema **v3** (`maybeUpgrade()` recreates
+  the table; the schema bump also drops the removed `lcmt_consent_policies` table).
 - **Schema lifecycle:** created on `register_activation_hook` via `dbDelta`;
   `ConsentLog::maybeUpgrade()` (hooked on `admin_init`) re-runs `createTable()`
   when the stored `lcmt_dev_consent_db_version` option differs from
@@ -103,8 +107,8 @@ inject, the log is the audit trail.
 - **REST route:** `POST lcmt-dev-consent/v1/log` (`RestController`). Permission =
   valid `wp_rest` nonce (`X-WP-Nonce` header). Body carries **only** `{event}`;
   the server reads `choices` + `cid` from the cookie sent with the request and
-  derives `policy_version` + `cookie_version` itself (never trusts the body for
-  them). Per-IP transient rate limit (30 req / 60 s; IP hashed into the transient
+  derives `cookie_version` itself (never trusts the body for it). Per-IP transient
+  rate limit (30 req / 60 s; IP hashed into the transient
   key, never persisted). Best-effort: a failed/blocked request never blocks the
   client-side cookie write.
 - **Frontend trigger:** `assets/src/consent-log.ts` (`logConsentEvent` +

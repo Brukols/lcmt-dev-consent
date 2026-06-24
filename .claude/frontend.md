@@ -7,8 +7,10 @@
 - `assets/src/banner.scss` — Styles, BEM class names, CSS variables on `:root`
 - `assets/src/youtube.ts` — Standalone YouTube placeholder upgrader (separate webpack entry)
 - `assets/src/youtube.scss` — Placeholder styles, reuses `--lcmt-consent-*` variables
+- `assets/src/googlemaps.ts` — Standalone Google Maps placeholder upgrader (separate webpack entry)
+- `assets/src/googlemaps.scss` — Map placeholder styles, reuses `--lcmt-consent-*` variables
 - `assets/dist/` — Built + committed output
-- `webpack.config.js` — esbuild-loader (fast TS) + sass-loader + MiniCssExtract + WebpackManifestPlugin; two entries: `banner` and `youtube`
+- `webpack.config.js` — esbuild-loader (fast TS) + sass-loader + MiniCssExtract + WebpackManifestPlugin; three entries: `banner`, `youtube`, `googlemaps`
 - `tsconfig.json` — `strict: true`, `noEmit: true` (type-check only; build does the emit)
 - `package.json` scripts: `build` (prod, hashed), `build:dev`, `watch`
 
@@ -20,7 +22,7 @@ npm run build:dev    # unhashed, sourcemaps
 npm run watch        # dev watch mode
 ```
 
-`npm run build` produces `assets/dist/banner.[contenthash:8].{js,css}`, `youtube.[contenthash:8].{js,css}`, and `manifest.json` (used by [`Assets::readManifest()`](../src/Frontend/Assets.php) to resolve hashed filenames at runtime).
+`npm run build` produces `assets/dist/banner.[contenthash:8].{js,css}`, `youtube.[contenthash:8].{js,css}`, `googlemaps.[contenthash:8].{js,css}`, and `manifest.json` (used by [`Assets::readManifest()`](../src/Frontend/Assets.php) to resolve hashed filenames at runtime).
 
 ## Reopen preferences after a decision ("Gérer les cookies")
 
@@ -124,6 +126,16 @@ The script:
 - Listens for `lcmt-consent:accepted` (`detail.key === 'youtube'`) so a banner-driven accept upgrades every placeholder on the page.
 
 The iframe markup is **duplicated** between PHP `YouTubeEmbed::renderIframe()` and JS `buildIframe()` — five attributes today (`src`, `title`, `class`, `frameborder`, `allow`, `allowfullscreen`, `loading`). If you change one side, change the other.
+
+## Google Maps bundle (`googlemaps.ts` + `googlemaps.scss`)
+Identical model to the YouTube bundle: a separate webpack entry, enqueued by `Assets::enqueueGooglemaps()` only when the plugin is enabled, the `googlemaps` service is enabled, and the visitor hasn't accepted it yet (returning visitors who accepted load zero bytes). Standalone, localizes its own `window.lcmtConsent` slice on the `lcmt-dev-consent-googlemaps` handle.
+
+The script:
+- Finds every `.lcmt-maps-placeholder[data-lcmt-maps-src]` placeholder on DOM ready.
+- Wires "Accept and display" → write `googlemaps=true` into the consent cookie → dispatch `lcmt-consent:accepted` → rebuild the iframe from `data-lcmt-maps-src` + `data-lcmt-maps-height` and swap.
+- Listens for `lcmt-consent:accepted` (`detail.key === 'googlemaps'`) so a banner-driven accept upgrades every placeholder on the page.
+
+The iframe markup is **duplicated** between PHP `GoogleMapsEmbed::renderIframe()` and JS `buildIframe()`. Unlike YouTube, the placeholder height is driven by the original embed's `height` attribute (preserved through `data-lcmt-maps-height`, default 450) since map embeds aren't a fixed 16:9.
 
 ## Custom events
 After a user accepts a service, the banner dispatches:

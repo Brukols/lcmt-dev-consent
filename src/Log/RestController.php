@@ -93,7 +93,6 @@ class RestController
             'consent_id' => $consentId,
             'event' => $event,
             'choices' => (string) wp_json_encode($choices),
-            'policy_version' => $this->log->policyVersion($this->settings, $this->registry),
             'cookie_version' => (string) $this->settings->get('consent_version', 0),
         ]);
 

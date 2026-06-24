@@ -9,6 +9,7 @@ use LcmtDev\Consent\Frontend\Assets;
 use LcmtDev\Consent\Frontend\Banner;
 use LcmtDev\Consent\Frontend\ScriptInjector;
 use LcmtDev\Consent\Frontend\YouTubeEmbed;
+use LcmtDev\Consent\Frontend\GoogleMapsEmbed;
 use LcmtDev\Consent\Frontend\CookieTable;
 use LcmtDev\Consent\Frontend\ConsentReopen;
 use LcmtDev\Consent\Log\ConsentLog;
@@ -48,6 +49,7 @@ class Plugin
         (new Banner($settings, $registry, $translations))->register();
         (new ScriptInjector($settings, $registry))->register();
         (new YouTubeEmbed())->register();
+        (new GoogleMapsEmbed())->register();
         (new CookieTable($cookies, $translations))->register();
         (new ConsentReopen($settings, $registry, $translations))->register();
     }

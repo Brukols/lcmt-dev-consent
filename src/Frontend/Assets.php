@@ -24,6 +24,7 @@ class Assets
     {
         add_action('wp_enqueue_scripts', [$this, 'enqueue']);
         add_action('wp_enqueue_scripts', [$this, 'enqueueYoutube']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueueGooglemaps']);
     }
 
     public function enqueue(): void
@@ -111,6 +112,52 @@ class Assets
             // so the banner is dismissed), and youtube.ts needs the cookie name
             // and lifetime to write the consent cookie.
             wp_localize_script('lcmt-dev-consent-youtube', 'lcmtConsent', $this->clientConfig());
+        }
+    }
+
+    /**
+     * Enqueue the Google Maps placeholder bundle, but only when the placeholder
+     * could actually be rendered: service is enabled in settings AND the user
+     * hasn't already accepted Google Maps. Mirrors enqueueYoutube().
+     */
+    public function enqueueGooglemaps(): void
+    {
+        if (!$this->settings->get('enabled', true) || is_admin()) {
+            return;
+        }
+        $services = (array) $this->settings->get('services', []);
+        if (empty($services['googlemaps']['enabled'])) {
+            return;
+        }
+        $cookieName = $this->settings->effectiveCookieName();
+        if (Consent::isAllowed('googlemaps', $cookieName)) {
+            return;
+        }
+
+        $manifest = $this->readManifest();
+        $jsFile = $manifest['googlemaps.js'] ?? null;
+        $cssFile = $manifest['googlemaps.css'] ?? null;
+
+        if ($cssFile) {
+            wp_enqueue_style(
+                'lcmt-dev-consent-googlemaps',
+                LCMT_DEV_CONSENT_URL . 'assets/dist/' . $cssFile,
+                [],
+                LCMT_DEV_CONSENT_VERSION
+            );
+        }
+        if ($jsFile) {
+            wp_enqueue_script(
+                'lcmt-dev-consent-googlemaps',
+                LCMT_DEV_CONSENT_URL . 'assets/dist/' . $jsFile,
+                [],
+                LCMT_DEV_CONSENT_VERSION,
+                true
+            );
+            // Always localize on the googlemaps handle too: the banner script may
+            // not be enqueued, and googlemaps.ts needs the cookie name + lifetime
+            // to write the consent cookie.
+            wp_localize_script('lcmt-dev-consent-googlemaps', 'lcmtConsent', $this->clientConfig());
         }
     }
 
