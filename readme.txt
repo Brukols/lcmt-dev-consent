@@ -4,7 +4,7 @@ Tags: cookies, consent, gdpr, privacy, gtm, google analytics
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 
 Lightweight, performance-focused cookie consent banner. JS/CSS are loaded only while consent is pending; accepted services are injected server-side from wp_head afterwards.
@@ -44,6 +44,12 @@ Listen for client-side acceptance (first visit only):
 });`
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Google Maps consent gate — embedded maps are replaced by a consent placeholder until the visitor accepts (mirrors the YouTube gate). Detects raw Google Maps iframes in content/widgets and theme templates via `GoogleMapsEmbed::render()`.
+* Change: YouTube and Google Maps services now ship disabled by default (opt-in from Settings → Cookie Consent → Services).
+* Fix: the "Gérer les cookies" reopen panel now renders in the current page language on multilingual sites instead of the site default.
+* Build: `npm run package` produces a clean, upload-ready plugin zip (dev files excluded).
 
 = 1.0.0 =
 * Initial release.

@@ -41,11 +41,43 @@ class ConsentReopen
         ]);
     }
 
-    /** @return array{html:string} */
-    public function panel(): array
+    /**
+     * Render the consent panel for the lazy "Gérer les cookies" reopen flow.
+     *
+     * The panel is fetched in a separate REST request that carries no language
+     * context, so without help WordPress/Polylang would render it under the site
+     * DEFAULT locale — showing French texts on an English page. The opener passes
+     * the page's locale as `lcmt_lang`; we switch to it around buildHtml() so the
+     * `.mo` (and any Polylang string translation) resolves in the right language.
+     *
+     * @param mixed $request WP_REST_Request (or any object exposing get_param()).
+     * @return array{html:string}
+     */
+    public function panel($request = null): array
     {
+        $locale = '';
+        if (is_object($request) && method_exists($request, 'get_param')) {
+            $locale = (string) $request->get_param('lcmt_lang');
+        }
+
+        $switched = false;
+        if ($locale !== '' && $this->isValidLocale($locale) && $locale !== determine_locale()) {
+            $switched = (bool) switch_to_locale($locale);
+        }
+
         $banner = new Banner($this->settings, $this->registry, $this->t);
-        return ['html' => $banner->buildHtml()];
+        $html = $banner->buildHtml();
+
+        if ($switched) {
+            restore_previous_locale();
+        }
+        return ['html' => $html];
+    }
+
+    /** Guard switch_to_locale() against arbitrary input (e.g. fr_FR, en, en_US, de_DE_formal). */
+    private function isValidLocale(string $locale): bool
+    {
+        return (bool) preg_match('/^[a-z]{2,3}(_[A-Z]{2})?(_[A-Za-z]+)?$/', $locale);
     }
 
     /** @param array<string,mixed>|string $atts */
@@ -92,8 +124,12 @@ class ConsentReopen
         }
 
         $config = ClientConfig::build($this->settings, $this->registry);
+        // Carry the CURRENT page locale to the REST panel request so the panel
+        // renders in the same language as the page the visitor is on (the REST
+        // request itself has no language context — see panel()).
+        $panelUrl = add_query_arg('lcmt_lang', get_locale(), rest_url(RestController::NAMESPACE . self::PANEL_ROUTE));
         $reopen = [
-            'panelUrl' => rest_url(RestController::NAMESPACE . self::PANEL_ROUTE),
+            'panelUrl' => $panelUrl,
             'cssUrl' => LCMT_DEV_CONSENT_URL . 'assets/dist/' . $cssFile,
             'jsUrl' => LCMT_DEV_CONSENT_URL . 'assets/dist/' . $jsFile,
         ];

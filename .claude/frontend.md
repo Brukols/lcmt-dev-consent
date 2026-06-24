@@ -47,9 +47,15 @@ loading the banner bundle until they actually trigger it.
   config via [`ClientConfig::build()`](../src/Frontend/ClientConfig.php)) +
   `window.lcmtConsentReopen` (`{panelUrl,cssUrl,jsUrl}`), and binds a delegated
   click on `.lcmt-open-consent`.
-- **Lazy reopen flow:** first trigger → `fetch` `GET /wp-json/lcmt-dev-consent/v1/panel`
+- **Lazy reopen flow:** first trigger → `fetch` `GET /wp-json/lcmt-dev-consent/v1/panel?lcmt_lang=<locale>`
   (returns `{html}` from [`Banner::buildHtml()`](../src/Frontend/Banner.php),
-  PHP single source of truth) → inject markup + the banner CSS/JS bundle. When
+  PHP single source of truth) → inject markup + the banner CSS/JS bundle.
+- **Panel language (multilingual):** the REST panel request carries no language
+  context, so without help it renders in the site DEFAULT locale (e.g. French on
+  an English page). `maybeOutputOpener()` appends the current page locale as
+  `lcmt_lang` (`get_locale()`); `ConsentReopen::panel()` validates it and wraps
+  `buildHtml()` in `switch_to_locale()`/`restore_previous_locale()` so the panel
+  matches the page language. When
   `banner.ts` boots it sets `window.lcmtConsent.open` (real impl) + `window.__lcmtBannerReady`,
   and if `window.__lcmtConsentOpenRequested` is set, opens the panel immediately
   (`ConsentBanner.openPanel()`, which re-syncs from the cookie). A `loading` guard
