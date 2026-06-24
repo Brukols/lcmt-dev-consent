@@ -12,7 +12,8 @@
 - `assets/dist/` — Built + committed output
 - `webpack.config.js` — esbuild-loader (fast TS) + sass-loader + MiniCssExtract + WebpackManifestPlugin; three entries: `banner`, `youtube`, `googlemaps`
 - `tsconfig.json` — `strict: true`, `noEmit: true` (type-check only; build does the emit)
-- `package.json` scripts: `build` (prod, hashed), `build:dev`, `watch`
+- `package.json` scripts: `build` (prod, hashed), `build:dev`, `watch`, `package` (release zip)
+- `bin/build.sh` — release packager (allowlist copy → zip), invoked by `npm run package`
 
 ## Run commands
 ```bash
@@ -20,9 +21,13 @@ npm install
 npm run build        # production, hashed filenames
 npm run build:dev    # unhashed, sourcemaps
 npm run watch        # dev watch mode
+npm run package      # production build + clean release zip
 ```
 
 `npm run build` produces `assets/dist/banner.[contenthash:8].{js,css}`, `youtube.[contenthash:8].{js,css}`, `googlemaps.[contenthash:8].{js,css}`, and `manifest.json` (used by [`Assets::readManifest()`](../src/Frontend/Assets.php) to resolve hashed filenames at runtime).
+
+## Release packaging (`npm run package`)
+[`bin/build.sh`](../bin/build.sh) produces an upload-ready zip at `build/lcmt-dev-consent-<version>.zip` (version read from the plugin header). It runs the production build, then copies **only** the runtime paths into a staging folder using an **allowlist** — `lcmt-dev-consent.php`, `uninstall.php`, `readme.txt`, `src/`, `languages/`, `assets/dist/` — so dev files (`.claude/`, `docs/`, `tests/`, `node_modules/`, `vendor/`, `assets/src/`, `composer.*`, `package*.json`, `webpack.config.js`, `tsconfig.json`, `phpunit.xml`, `CLAUDE.md`, caches) can never leak into a release. The zip's top-level folder is `lcmt-dev-consent/`, matching WP's "Upload Plugin" requirement. `build/` is gitignored. **Allowlist, not denylist:** if you add a new runtime directory, add it to the `INCLUDE` array in `bin/build.sh` or it won't ship.
 
 ## Reopen preferences after a decision ("Gérer les cookies")
 

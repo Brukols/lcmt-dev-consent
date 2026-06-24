@@ -6,7 +6,8 @@
     "scripts": {
         "build": "webpack --mode=production",
         "build:dev": "webpack --mode=development",
-        "watch": "webpack --watch --mode=development"
+        "watch": "webpack --watch --mode=development",
+        "package": "bash bin/build.sh"
     },
     "devDependencies": {
         "css-loader": "^6.8.1",
