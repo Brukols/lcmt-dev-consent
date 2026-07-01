@@ -74,6 +74,10 @@
         padding: 20px;
         overflow-y: auto;
         min-height: 0;
+        // Cap the scroll region so a long service list doesn't stretch the
+        // panel toward full viewport height. Stays a max (not a fixed height),
+        // so short content and small viewports still shrink below it.
+        max-height: 500px;
         flex: 1 1 auto;
         -webkit-overflow-scrolling: touch;
     }
