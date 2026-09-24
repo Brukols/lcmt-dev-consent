@@ -4,7 +4,7 @@
  * Plugin Name: LCMT Consent
  * Plugin URI:  https://github.com/Brukols/lcmt-dev-consent
  * Description: Lightweight, performance-focused cookie consent banner. Loads banner JS/CSS only when consent is pending; injects accepted services server-side.
- * Version:     1.5.2
+ * Version:     1.5.3
  * Author:      Amaury Lecomte
  * Author URI:  https://amaurylecomte.com
  * Text Domain: lcmt-dev-consent
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('LCMT_DEV_CONSENT_VERSION', '1.5.2');
+define('LCMT_DEV_CONSENT_VERSION', '1.5.3');
 define('LCMT_DEV_CONSENT_FILE', __FILE__);
 define('LCMT_DEV_CONSENT_DIR', plugin_dir_path(__FILE__));
 define('LCMT_DEV_CONSENT_URL', plugin_dir_url(__FILE__));

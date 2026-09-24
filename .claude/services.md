@@ -75,7 +75,8 @@ All of: `GOOGLESITEKIT_VERSION` defined, `analytics-4` in the `googlesitekit_act
 
 ### What detection turns on
 - `ServiceRegistry::isConsentMode()` → true: the 4 virtual signal services appear in the banner and `ScriptInjector` prints the `gtag('consent','default', …)` snippet at `wp_head` priority 1, before Site Kit's tag. **No GTM loader** (that stays GTM-only).
-- A UI `googleanalytics` service with the **same ID** as Site Kit is dropped (would double-count).
+- The predefined `googleanalytics` and `googletagmanager` services are **switched off whatever their ID** (`ServiceRegistry::siteKitManagedServices()`): GA would double-count (Site Kit's GT- tag and a G- ID can feed the same property), GTM belongs in Site Kit's Tag Manager module. `isGtmConsentMode()` returns false, so no GTM loader either. Their stored settings are untouched and apply again when Site Kit is no longer detected.
+- Admin: both rows are greyed out and disabled with "Managed by Google Site Kit"; since disabled inputs are not submitted, `sanitizeForTab('services')` keeps their stored values.
 - `SiteKit::register()` hooks `googlesitekit_{analytics-4|ads|tagmanager}_tag_blocked`.
 
 ### Basic mode (default)

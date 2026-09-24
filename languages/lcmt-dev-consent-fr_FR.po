@@ -557,3 +557,9 @@ msgstr "Marquée"
 
 msgid "A stronger shadow sets the banner apart from a white page."
 msgstr "Une ombre plus marquée détache le bandeau d’une page blanche."
+
+msgid "Managed by Google Site Kit"
+msgstr "Géré par Google Site Kit"
+
+msgid "The Google Analytics and Google Tag Manager services below are switched off while Site Kit inserts its tag, to avoid counting visits twice: use the Analytics and Tag Manager modules of Site Kit instead. Their settings are kept."
+msgstr "Les services Google Analytics et Google Tag Manager ci-dessous sont désactivés tant que Site Kit insère sa balise, pour ne pas compter les visites deux fois : utilisez plutôt les modules Analytics et Tag Manager de Site Kit. Leurs réglages sont conservés."

@@ -62,17 +62,45 @@ class ServiceRegistrySiteKitTest extends TestCase
         $this->assertArrayNotHasKey('sitekit_id', $service->data);
     }
 
-    public function test_google_analytics_service_with_the_site_kit_id_is_skipped(): void
+    public function test_google_analytics_is_ignored_whatever_its_id(): void
     {
-        $registry = $this->registry(['services' => ['googleanalytics' => ['enabled' => true, 'id' => 'GT-XYZ789']]]);
-
-        $this->assertNull($registry->find('googleanalytics'));
+        foreach (['GT-XYZ789', 'G-OTHER1'] as $id) {
+            $registry = $this->registry(['services' => ['googleanalytics' => ['enabled' => true, 'id' => $id]]]);
+            $this->assertNull($registry->find('googleanalytics'), $id);
+        }
     }
 
-    public function test_google_analytics_service_with_another_id_is_kept(): void
+    public function test_google_tag_manager_is_ignored(): void
     {
-        $registry = $this->registry(['services' => ['googleanalytics' => ['enabled' => true, 'id' => 'G-OTHER1']]]);
+        $registry = $this->registry(['services' => ['googletagmanager' => ['enabled' => true, 'id' => 'GTM-ABC']]]);
+
+        $this->assertNull($registry->find('googletagmanager'));
+    }
+
+    public function test_gtm_consent_mode_is_off_when_site_kit_handles_the_tags(): void
+    {
+        $registry = $this->registry(['services' => ['googletagmanager' => ['enabled' => true, 'id' => 'GTM-ABC', 'consent_mode' => true]]]);
+
+        $this->assertFalse($registry->isGtmConsentMode());
+        $this->assertTrue($registry->isConsentMode());
+    }
+
+    public function test_google_services_come_back_without_site_kit(): void
+    {
+        $registry = $this->registry([
+            'services' => [
+                'googleanalytics' => ['enabled' => true, 'id' => 'G-OTHER1'],
+                'googletagmanager' => ['enabled' => true, 'id' => 'GTM-ABC'],
+            ],
+        ], false);
 
         $this->assertNotNull($registry->find('googleanalytics'));
+        $this->assertNotNull($registry->find('googletagmanager'));
+    }
+
+    public function test_managed_service_keys(): void
+    {
+        $this->assertSame(['googleanalytics', 'googletagmanager'], $this->registry()->siteKitManagedServices());
+        $this->assertSame([], $this->registry([], false)->siteKitManagedServices());
     }
 }

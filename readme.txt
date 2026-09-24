@@ -4,7 +4,7 @@ Tags: cookies, consent, gdpr, privacy, gtm, google analytics
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 
 Lightweight, performance-focused cookie consent banner. JS/CSS are loaded only while consent is pending; accepted services are injected server-side from wp_head afterwards.
@@ -44,6 +44,9 @@ Listen for client-side acceptance (first visit only):
 });`
 
 == Changelog ==
+
+= 1.5.3 =
+* Change: while Google Site Kit inserts its tag, the plugin's Google Analytics and Google Tag Manager services are switched off (greyed out in Settings → Services, "Managed by Google Site Kit"), whatever their ID, so visits are never counted twice. Their settings are kept and apply again without Site Kit.
 
 = 1.5.2 =
 * Fix: "Check for updates" crashed with "Class Parsedown not found" — the update checker's vendor files were missing from the 1.5.0 and 1.5.1 zips. Sites on 1.5.0 or 1.5.1 must install 1.5.2 by hand once.

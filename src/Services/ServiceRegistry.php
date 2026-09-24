@@ -32,6 +32,7 @@ class ServiceRegistry
         $meta = $this->settings->predefinedServiceMeta();
         $gtmInConsentMode = $this->isGtmConsentMode();
         $siteKitTagId = $this->isSiteKitDetected() ? $this->siteKit->tagId() : '';
+        $siteKitManaged = $this->siteKitManagedServices();
 
         foreach ($uiServices as $key => $config) {
             if (empty($config['enabled'])) {
@@ -41,8 +42,9 @@ class ServiceRegistry
             if ($key === 'googletagmanager' && $gtmInConsentMode) {
                 continue;
             }
-            // Site Kit already prints this tag under Consent Mode: loading it twice would double-count.
-            if ($key === 'googleanalytics' && $siteKitTagId !== '' && ($config['id'] ?? '') === $siteKitTagId) {
+            // Site Kit prints the Google tag: its own GA / GTM would double-count or
+            // bypass its consent handling. Settings are kept for when Site Kit goes away.
+            if (in_array($key, $siteKitManaged, true)) {
                 continue;
             }
             $m = $meta[$key] ?? [];
@@ -151,8 +153,23 @@ class ServiceRegistry
 
     public function isGtmConsentMode(): bool
     {
+        if (in_array('googletagmanager', $this->siteKitManagedServices(), true)) {
+            return false;
+        }
         $gtm = (array) ($this->settings->get('services', [])['googletagmanager'] ?? []);
         return !empty($gtm['enabled']) && !empty($gtm['consent_mode']) && !empty($gtm['id']);
+    }
+
+    /**
+     * Predefined services switched off while Site Kit prints the Google tag:
+     * Google Analytics comes with Site Kit, and GTM goes through Site Kit's
+     * Tag Manager module.
+     *
+     * @return string[]
+     */
+    public function siteKitManagedServices(): array
+    {
+        return $this->isSiteKitDetected() ? ['googleanalytics', 'googletagmanager'] : [];
     }
 
     public function gtmId(): string
