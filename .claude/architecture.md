@@ -3,7 +3,10 @@
 ## Directory layout
 ```
 lcmt-dev-consent/
-├── lcmt-dev-consent.php         # Plugin bootstrap (header + autoload + init)
+├── lcmt-dev-consent.php         # Plugin bootstrap (header + autoload + updater + init)
+├── lib/plugin-update-checker/    # Vendored Plugin Update Checker v5.7 (do not edit)
+├── .github/workflows/release.yml # Release zip on `v*` tags — see releasing.md
+├── .gitattributes                # export-ignore rules for the release zip
 ├── uninstall.php                 # delete_option on plugin uninstall
 ├── readme.txt
 ├── package.json                  # JS build deps
@@ -17,6 +20,7 @@ lcmt-dev-consent/
 │   └── lcmt-dev-consent-fr_FR.mo # compiled with msgfmt
 ├── src/
 │   ├── Plugin.php                # Main composition root
+│   ├── Updater.php               # GitHub releases → Dashboard → Updates
 │   ├── Consent.php               # Cookie read/parse/isAllowed (public API)
 │   ├── Frontend/
 │   │   ├── Assets.php

@@ -1,10 +1,10 @@
-=== LCMT Dev — Consent ===
+=== LCMT Consent ===
 Contributors: amaurylecomte
 Tags: cookies, consent, gdpr, privacy, gtm, google analytics
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 
 Lightweight, performance-focused cookie consent banner. JS/CSS are loaded only while consent is pending; accepted services are injected server-side from wp_head afterwards.
@@ -44,6 +44,10 @@ Listen for client-side acceptance (first visit only):
 });`
 
 == Changelog ==
+
+= 1.5.0 =
+* New: updates from the GitHub releases — new versions show up in Dashboard → Updates like any wordpress.org plugin.
+* Change: the plugin is now displayed as "LCMT Consent" (folder, slug and settings unchanged).
 
 = 1.4.0 =
 * New: Google Site Kit compatibility with Google Consent Mode v2. When Site Kit inserts its Google tag, the banner shows the 4 consent signals and sends them to gtag before Site Kit's tag. Basic mode (default): Site Kit's tag is blocked until a signal is granted and loaded on the first accept without reload. Optional advanced mode: the tag always loads with every signal denied. Site Kit settings are never modified.

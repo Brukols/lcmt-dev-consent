@@ -1,0 +1,18 @@
+# Left out of the release zip built with `git archive`: development files
+# that a site running the plugin never needs.
+/.claude             export-ignore
+/.github             export-ignore
+/.gitattributes      export-ignore
+/.gitignore          export-ignore
+/CLAUDE.md           export-ignore
+/assets/src          export-ignore
+/bin                 export-ignore
+/composer.json       export-ignore
+/composer.lock       export-ignore
+/docs                export-ignore
+/package.json        export-ignore
+/phpunit.xml         export-ignore
+/tests               export-ignore
+/tsconfig.json       export-ignore
+/webpack.config.js   export-ignore
+/yarn.lock           export-ignore
