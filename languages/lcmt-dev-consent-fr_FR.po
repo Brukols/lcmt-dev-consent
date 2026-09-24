@@ -529,3 +529,16 @@ msgstr "Dans Apparence → Menus, ajoutez un lien personnalisé avec l'URL"
 
 msgid "and your label."
 msgstr "et votre libellé."
+
+msgid "Google Site Kit detected"
+msgstr "Google Site Kit détecté"
+
+#. translators: %s: Google tag ID, e.g. GT-XXXXXXX
+msgid "Site Kit inserts the Google tag %s. It is now handled with Google Consent Mode v2: the banner shows the 4 consent signals and sends them to Google. Nothing is changed in Site Kit settings."
+msgstr "Site Kit insère la balise Google %s. Elle est désormais gérée avec Google Consent Mode v2 : le bandeau affiche les 4 signaux de consentement et les transmet à Google. Aucun réglage de Site Kit n’est modifié."
+
+msgid "Advanced mode: load the Google tag before consent"
+msgstr "Mode avancé : charger la balise Google avant le consentement"
+
+msgid "Unchecked (recommended): the Site Kit tag is blocked until the visitor grants at least one signal, so nothing is sent to Google before consent. Checked: the tag always loads with every signal denied, and Google receives cookieless pings used for modelling — the CNIL considers this data collection without consent."
+msgstr "Décoché (recommandé) : la balise Site Kit est bloquée tant que le visiteur n’a accepté aucun signal, rien n’est donc envoyé à Google avant le consentement. Coché : la balise se charge toujours avec tous les signaux refusés, et Google reçoit des pings sans cookies utilisés pour la modélisation — la CNIL considère qu’il s’agit d’une collecte de données sans consentement."

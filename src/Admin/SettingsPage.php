@@ -332,7 +332,15 @@ class SettingsPage
                     }
                 }
                 $cookies = $this->sanitizeServiceCookies((array) ($input['service_cookies'] ?? []));
-                return ['services' => $services, 'service_cookies' => $cookies];
+                return [
+                    'services' => $services,
+                    'service_cookies' => $cookies,
+                    // The checkbox is only rendered while Site Kit is detected: keep the stored
+                    // value otherwise, so a temporarily inactive Site Kit does not reset it.
+                    'sitekit_advanced' => isset($input['sitekit_advanced_shown'])
+                        ? !empty($input['sitekit_advanced'])
+                        : (bool) $this->settings->get('sitekit_advanced', false),
+                ];
 
             case 'categories':
                 $catsInput = $input['categories'] ?? [];
@@ -587,6 +595,7 @@ class SettingsPage
         $services = $this->settings->all()['services'];
         $meta = $this->settings->predefinedServiceMeta();
         $categories = array_keys($this->settings->all()['categories']);
+        $this->renderSiteKitNotice();
         ?>
         <h3><?= esc_html__('Predefined services', 'lcmt-dev-consent') ?></h3>
         <table class="lcmt-services-table">
@@ -660,6 +669,41 @@ class SettingsPage
                 </tbody>
             </table>
         <?php endif; ?>
+        <?php
+    }
+
+    /**
+     * Site Kit block of the Services tab: only shown when Site Kit prints its tag.
+     */
+    private function renderSiteKitNotice(): void
+    {
+        $siteKit = $this->registry->siteKit();
+        if (!$siteKit || !$siteKit->isDetected()) {
+            return;
+        }
+        $advanced = $siteKit->isAdvancedMode();
+        ?>
+        <div class="notice notice-info inline" style="margin:16px 0;padding:12px 16px">
+            <h3 style="margin-top:0"><?= esc_html__('Google Site Kit detected', 'lcmt-dev-consent') ?></h3>
+            <p>
+                <?= wp_kses(
+                    sprintf(
+                        /* translators: %s: Google tag ID, e.g. GT-XXXXXXX */
+                        __('Site Kit inserts the Google tag %s. It is now handled with Google Consent Mode v2: the banner shows the 4 consent signals and sends them to Google. Nothing is changed in Site Kit settings.', 'lcmt-dev-consent'),
+                        '<code>' . esc_html($siteKit->tagId()) . '</code>'
+                    ),
+                    ['code' => []]
+                ) ?>
+            </p>
+            <input type="hidden" name="lcmt[sitekit_advanced_shown]" value="1">
+            <label style="display:block;margin-top:8px">
+                <input type="checkbox" name="lcmt[sitekit_advanced]" <?php checked($advanced); ?>>
+                <?= esc_html__('Advanced mode: load the Google tag before consent', 'lcmt-dev-consent') ?>
+            </label>
+            <p class="description" style="margin:4px 0 0">
+                <?= esc_html__('Unchecked (recommended): the Site Kit tag is blocked until the visitor grants at least one signal, so nothing is sent to Google before consent. Checked: the tag always loads with every signal denied, and Google receives cookieless pings used for modelling — the CNIL considers this data collection without consent.', 'lcmt-dev-consent') ?>
+            </p>
+        </div>
         <?php
     }
 

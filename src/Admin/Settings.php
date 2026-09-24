@@ -107,6 +107,8 @@ class Settings
             'log_enabled' => true,
             'log_retention_months' => 36,
             'service_cookies' => [],
+            // Google Site Kit: let its tag load before consent (Consent Mode v2 "advanced")
+            'sitekit_advanced' => false,
             'custom_css' => '',
         ];
     }
@@ -209,9 +211,9 @@ class Settings
     }
 
     /**
-     * Virtual services added to the banner when GTM Consent Mode v2 is enabled.
-     * GTM itself always loads server-side; these 4 items toggle the individual
-     * gtag consent signals.
+     * Virtual services added to the banner when Consent Mode v2 is on (GTM
+     * Consent Mode enabled, or Google Site Kit detected). These 4 items toggle
+     * the individual gtag consent signals.
      */
     public function consentModeServices(): array
     {

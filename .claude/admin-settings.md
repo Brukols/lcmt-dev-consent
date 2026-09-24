@@ -12,7 +12,7 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 |------|--------|-------|
 | `general` | `tab_general()` | `enabled`, `position`, `privacy_url`, `texts.*` |
 | `appearance` | `tab_appearance()` | `appearance.*` (colors + radius + z-index + `title_icon`) |
-| `services` | `tab_services()` | `services.*` (predefined service config + GTM Consent Mode v2 checkbox) |
+| `services` | `tab_services()` | `services.*` (predefined service config + GTM Consent Mode v2 checkbox), `sitekit_advanced` (Site Kit block, only rendered when Site Kit is detected) |
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
 | `consent_log` | `tab_consent_log()` | `log_enabled`, `log_retention_months` + read-only record browser (paginated/filterable) + CSV export button |
@@ -69,6 +69,7 @@ Single autoloaded row: `lcmt_dev_consent_settings`. Defaults live in [`Settings:
     'log_enabled' => true,            // consent_log tab — record consent events server-side
     'log_retention_months' => 36,     // consent_log tab — daily cron purges older rows (1-120)
     'service_cookies' => [],          // services tab — admin overrides: map<service_key, cookie_row[]>
+    'sitekit_advanced' => false,      // services tab — Google Site Kit: load its tag before consent (Consent Mode "advanced")
     'custom_css' => '',
 ]
 ```

@@ -26,7 +26,7 @@ Result is cached on the instance.
 
 ## Google Consent Mode v2 flow
 
-Triggered by the **Use Google Consent Mode v2** checkbox on the GTM row (Services tab). When active:
+Triggered by the **Use Google Consent Mode v2** checkbox on the GTM row (Services tab), or automatically when Google Site Kit is detected (see [Google Site Kit](#google-site-kit) — same virtual services and defaults, no GTM loader). `ServiceRegistry::isConsentMode()` covers both; `isGtmConsentMode()` is the GTM-only case. When GTM Consent Mode is active:
 
 ### 1. GTM is pulled out of the user-facing list
 `ServiceRegistry::all()` skips the `googletagmanager` key when building UI services. GTM won't show up as a banner toggle; it always loads.
@@ -65,6 +65,34 @@ All 4 signals default to `"denied"` if the cookie isn't set yet. Returning visit
 
 ### Turning Consent Mode v2 OFF
 If the admin unchecks the box, `isGtmConsentMode()` returns false. GTM becomes a normal per-service toggle again: the built-in injector in `ServiceRegistry::builtinInjectPhp('googletagmanager')` takes over, and the 4 virtual services disappear. The default server-side snippet is not emitted.
+
+## Google Site Kit
+
+[`Integrations\SiteKit`](../src/Integrations/SiteKit.php). Site Kit prints its Google tag on every page regardless of consent; when it does, the plugin puts that tag under Consent Mode v2 **without changing any Site Kit setting**.
+
+### Detection (`SiteKit::isDetected()`)
+All of: `GOOGLESITEKIT_VERSION` defined, `analytics-4` in the `googlesitekit_active_modules` option, `useSnippet` true in `googlesitekit_analytics-4_settings`, and a valid tag ID. `tagId()` = `googleTagID` (GT-…) when set, else `measurementID` (G-…). Result cached per request.
+
+### What detection turns on
+- `ServiceRegistry::isConsentMode()` → true: the 4 virtual signal services appear in the banner and `ScriptInjector` prints the `gtag('consent','default', …)` snippet at `wp_head` priority 1, before Site Kit's tag. **No GTM loader** (that stays GTM-only).
+- A UI `googleanalytics` service with the **same ID** as Site Kit is dropped (would double-count).
+- `SiteKit::register()` hooks `googlesitekit_{analytics-4|ads|tagmanager}_tag_blocked`.
+
+### Basic mode (default)
+- `filterTagBlocked()` blocks Site Kit's tags until the cookie has **at least one signal granted** → nothing reaches Google before consent.
+- Signal services carry `data.sitekit_id`. On first accept, `injectors.ts` sends each `consent update` then (deferred with `setTimeout(0)`, once per page) loads `gtag/js?id=<sitekit_id>` + `gtag('js')` + `gtag('config')` — so every signal of the same commit is updated before the config runs. No reload.
+- Later pages: the tag is no longer blocked, **Site Kit prints its own tag** (with its conversion events, linker, custom dimensions) after our defaults.
+
+### Advanced mode (`sitekit_advanced` setting)
+Site Kit's tag is never blocked; it loads with every signal denied by default and Google gets cookieless pings (modelling). Signal services have no `sitekit_id` (the tag is already there; the updates alone flip it live). The admin text warns that the CNIL treats this as collection without consent.
+
+### Site Kit's own Consent Mode setting
+If enabled in Site Kit, it prints a second, all-denied `consent default` **after** ours. For returning visitors, `ScriptInjector` therefore repeats granted signals as `gtag('consent','update', …)` — gtag resolves each signal as update-over-default, whatever the order (verified in Chrome: `google_tag_data.ics.entries.analytics_storage = {default:false, update:true}` → granted).
+
+### Limits
+- Site Kit's `_googlesitekit.gtagEvent` conversion events are lost on the single page where the visitor first accepts (our minimal tag), and before consent in basic mode.
+- AdSense (`googlesitekit_adsense_tag_blocked`) is not handled.
+- Testing locally: Site Kit only prints tags in the `production` environment and when the module is "connected" (`accountID`, `propertyID`, `webDataStreamID`, `measurementID` set). Use a throwaway plugin adding the `googlesitekit_allowed_tag_environment_types` filter, fake IDs in the option, and **never the client's real tag ID** (hits would reach their property).
 
 ## YouTube — per-embed gating
 

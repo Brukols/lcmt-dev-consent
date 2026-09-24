@@ -30,11 +30,15 @@ class ScriptInjector
         $cookieName = $this->settings->effectiveCookieName();
         $cookies = Consent::getCookies($cookieName);
 
-        // GTM Consent Mode v2: GTM loads unconditionally, preceded by gtag consent defaults
-        // built from the cookie state. Individual consent signals flip to "granted" via
-        // client-side gtag('consent', 'update', …) calls when the user accepts them.
+        // Consent Mode v2: gtag consent defaults built from the cookie state, printed
+        // before any Google tag. Individual signals flip to "granted" via client-side
+        // gtag('consent', 'update', …) calls when the user accepts them.
+        if ($this->registry->isConsentMode()) {
+            $this->emitConsentDefaults($cookies);
+        }
+        // GTM Consent Mode: GTM loads unconditionally, right after the defaults.
         if ($this->registry->isGtmConsentMode()) {
-            $this->emitConsentModeSnippet($cookies);
+            $this->emitGtmLoader();
         }
 
         foreach ($this->registry->all() as $service) {
@@ -50,26 +54,33 @@ class ScriptInjector
         }
     }
 
-    private function emitConsentModeSnippet(array $cookies): void
+    private function emitConsentDefaults(array $cookies): void
     {
-        $gtmId = $this->registry->gtmId();
-        if ($gtmId === '') {
+        $defaults = [];
+        foreach ($this->settings->consentModeServices() as $key => $meta) {
+            $defaults[$meta['signal']] = (($cookies[$key] ?? null) === 'true') ? 'granted' : 'denied';
+        }
+
+        $js = "window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};"
+            . "window.gtag('consent','default'," . wp_json_encode($defaults) . ");";
+
+        // Site Kit's own Consent Mode setting prints a second, all-denied default
+        // after this one. Updates always win over defaults, so granted signals are
+        // repeated as an update to survive it.
+        $granted = array_filter($defaults, fn($state) => $state === 'granted');
+        if ($granted && $this->registry->isSiteKitDetected()) {
+            $js .= "window.gtag('consent','update'," . wp_json_encode($granted) . ");";
+        }
+
+        echo "<script>{$js}</script>\n";
+    }
+
+    private function emitGtmLoader(): void
+    {
+        $gtmIdJs = esc_js($this->registry->gtmId());
+        if ($gtmIdJs === '') {
             return;
         }
-        $signalMap = [
-            'google_analytics_storage' => 'analytics_storage',
-            'google_ad_storage' => 'ad_storage',
-            'google_ad_user_data' => 'ad_user_data',
-            'google_ad_personalization' => 'ad_personalization',
-        ];
-        $defaults = [];
-        foreach ($signalMap as $key => $signal) {
-            $defaults[$signal] = (($cookies[$key] ?? null) === 'true') ? 'granted' : 'denied';
-        }
-        $defaultsJson = wp_json_encode($defaults);
-        $gtmIdJs = esc_js($gtmId);
-
-        echo "<script>window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window.gtag('consent','default',{$defaultsJson});</script>\n";
         echo "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{$gtmIdJs}');</script>\n";
     }
 }
