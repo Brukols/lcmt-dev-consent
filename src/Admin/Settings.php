@@ -48,6 +48,19 @@ class Settings
         return $version > 0 ? $name . '_v' . $version : $name;
     }
 
+    /**
+     * Box-shadow presets of the banner, keyed by the `appearance.shadow` setting.
+     */
+    public static function shadowPresets(): array
+    {
+        return [
+            'none' => 'none',
+            'light' => '0 4px 20px rgba(0, 0, 0, 0.08)',
+            'medium' => '0 10px 30px rgba(0, 0, 0, 0.15)',
+            'strong' => '0 16px 48px rgba(0, 0, 0, 0.25)',
+        ];
+    }
+
     public static function defaults(): array
     {
         return [
@@ -78,6 +91,7 @@ class Settings
                 'z_index' => 1001,
                 'title_icon' => 'icon',
                 'title_icon_url' => '',
+                'shadow' => 'light',
             ],
             'services' => [
                 'googletagmanager' => ['enabled' => false, 'id' => '', 'category' => 'api', 'display_name' => '', 'consent_mode' => false],

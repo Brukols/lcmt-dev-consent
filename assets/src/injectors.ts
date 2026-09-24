@@ -30,16 +30,31 @@ declare global {
     }
 }
 
+let pendingSignals: Record<string, "granted"> | null = null;
+
+// Signals accepted in the same commit are sent as a single consent update, as
+// Google recommends: one update per signal made gtag send hits with a partial
+// consent state in between. The flush runs as a microtask, after the banner's
+// synchronous commit loop and before loadSiteKitTag's setTimeout.
 function gtagConsentUpdate(signal: string): void {
-    // The server-side Consent Mode snippet defined window.gtag in <head>. Fallback-create
-    // it if the snippet didn't run for any reason.
-    if (typeof window.gtag !== "function") {
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function (...args: unknown[]) {
-            (window.dataLayer as unknown[]).push(args);
-        };
+    if (pendingSignals) {
+        pendingSignals[signal] = "granted";
+        return;
     }
-    window.gtag("consent", "update", { [signal]: "granted" });
+    pendingSignals = { [signal]: "granted" };
+    queueMicrotask(() => {
+        const signals = pendingSignals;
+        pendingSignals = null;
+        // The server-side Consent Mode snippet defined window.gtag in <head>.
+        // Fallback-create it if the snippet didn't run for any reason.
+        if (typeof window.gtag !== "function") {
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function (...args: unknown[]) {
+                (window.dataLayer as unknown[]).push(args);
+            };
+        }
+        window.gtag("consent", "update", signals);
+    });
 }
 
 let googleTagRequested = false;

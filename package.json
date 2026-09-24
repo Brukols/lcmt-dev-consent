@@ -1,6 +1,6 @@
 {
     "name": "lcmt-dev-consent",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "private": true,
     "description": "Build scripts for the LCMT Dev Consent plugin.",
     "scripts": {

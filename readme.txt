@@ -4,7 +4,7 @@ Tags: cookies, consent, gdpr, privacy, gtm, google analytics
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 
 Lightweight, performance-focused cookie consent banner. JS/CSS are loaded only while consent is pending; accepted services are injected server-side from wp_head afterwards.
@@ -44,6 +44,10 @@ Listen for client-side acceptance (first visit only):
 });`
 
 == Changelog ==
+
+= 1.5.1 =
+* New: banner shadow setting (Appearance → Shadow: none, light, medium, strong) to set the banner apart from a white page.
+* Improve: Google Consent Mode — the signals accepted together are sent as a single consent update, so Google never receives a partial consent state.
 
 = 1.5.0 =
 * New: updates from the GitHub releases — new versions show up in Dashboard → Updates like any wordpress.org plugin.
