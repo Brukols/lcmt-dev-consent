@@ -9,7 +9,6 @@
 /bin                 export-ignore
 /composer.json       export-ignore
 /composer.lock       export-ignore
-/docs                export-ignore
 /package.json        export-ignore
 /phpunit.xml         export-ignore
 /tests               export-ignore
