@@ -85,7 +85,9 @@ All of: `GOOGLESITEKIT_VERSION` defined, `analytics-4` in the `googlesitekit_act
 - Later pages: the tag is no longer blocked, **Site Kit prints its own tag** (with its conversion events, linker, custom dimensions) after our defaults.
 
 ### Advanced mode (`sitekit_advanced` setting)
-Site Kit's tag is never blocked; it loads with every signal denied by default and Google gets cookieless pings (modelling). Signal services have no `sitekit_id` (the tag is already there; the updates alone flip it live). The admin text warns that the CNIL treats this as collection without consent.
+Before the visitor chooses, Site Kit's tag is not blocked: it loads with every signal denied by default and Google gets cookieless pings (modelling). Signal services have no `sitekit_id` (the tag is already there; the batched update flips it live). The admin text warns that the CNIL treats this as collection without consent.
+
+Once the visitor has **explicitly refused every signal** (`SiteKit::hasRefusedEverySignal()`: all 4 keys at `false`, not `wait`/missing), the tag is blocked like in basic mode — nothing is sent against a stated refusal. Partial refusals keep the tag (the signals carry the state). The page where "refuse" is clicked keeps the already-loaded tag until the next navigation (a running script cannot be unloaded); no cookie is set there since every signal stays denied.
 
 ### Site Kit's own Consent Mode setting
 If enabled in Site Kit, it prints a second, all-denied `consent default` **after** ours. For returning visitors, `ScriptInjector` therefore repeats granted signals as `gtag('consent','update', …)` — gtag resolves each signal as update-over-default, whatever the order (verified in Chrome: `google_tag_data.ics.entries.analytics_storage = {default:false, update:true}` → granted).

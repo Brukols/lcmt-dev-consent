@@ -17,9 +17,11 @@ use LcmtDev\Consent\Consent;
  *   signal is granted, so nothing reaches Google before consent. On the first
  *   accept the banner loads the tag itself (see injectors.ts); on later pages
  *   Site Kit prints it again, untouched.
- * - Advanced mode (`sitekit_advanced`): Site Kit's tag always loads, with
- *   every signal denied by default, so Google gets cookieless pings for
- *   modelling. Requires the client's informed choice (CNIL).
+ * - Advanced mode (`sitekit_advanced`): Site Kit's tag loads before any
+ *   choice, with every signal denied by default, so Google gets cookieless
+ *   pings for modelling. Requires the client's informed choice (CNIL). Once
+ *   the visitor explicitly refuses every signal, the tag is blocked as in
+ *   basic mode: nothing is sent against a stated refusal.
  *
  * Nothing is changed in Site Kit's own settings: the tag is only blocked
  * through Site Kit's `googlesitekit_{module}_tag_blocked` filters, so
@@ -106,7 +108,7 @@ class SiteKit
             return true;
         }
         if ($this->isAdvancedMode()) {
-            return false;
+            return $this->hasRefusedEverySignal();
         }
         return !$this->hasGrantedSignal();
     }
@@ -123,6 +125,21 @@ class SiteKit
             }
         }
         return false;
+    }
+
+    /**
+     * Whether the visitor explicitly refused every Consent Mode signal (not
+     * merely "not decided yet").
+     */
+    public function hasRefusedEverySignal(): bool
+    {
+        $cookies = Consent::getCookies($this->settings->effectiveCookieName());
+        foreach (array_keys($this->settings->consentModeServices()) as $key) {
+            if (($cookies[$key] ?? null) !== 'false') {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function analyticsSettings(): array
