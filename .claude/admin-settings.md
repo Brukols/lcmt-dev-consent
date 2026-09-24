@@ -26,6 +26,8 @@ sanitized by `SettingsPage::sanitizeServiceCookies()` and returned alongside
 ## Per-tab save — CRITICAL
 The form includes a hidden `<input name="lcmt_tab" value="{current-tab}">`. On save, `handleSave()` dispatches to `sanitizeForTab($tab, $input)` which returns **only the slice of settings belonging to that tab**. This partial array is then merged on top of existing settings via `Settings::save()` (which calls `array_replace_recursive`).
 
+While Google Site Kit is detected, the Google Analytics and Google Tag Manager rows are rendered disabled ("Managed by Google Site Kit") and `sanitizeForTab('services')` keeps their stored values, since the browser does not submit disabled inputs — see [services.md](services.md#google-site-kit).
+
 **Why:** without per-tab scoping, submitting the General form sends no `services` fields → the sanitizer would rebuild services from defaults → all GTM IDs wiped. Same problem in reverse for the `enabled` checkbox when saving from Services.
 
 If you add a new setting, place it in the appropriate tab and extend exactly one branch of the `switch` in `sanitizeForTab()`.

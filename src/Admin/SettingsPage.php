@@ -318,7 +318,15 @@ class SettingsPage
             case 'services':
                 $svcInput = $input['services'] ?? [];
                 $services = [];
+                $stored = (array) $this->settings->get('services', []);
+                $siteKitManaged = $this->registry->siteKitManagedServices();
                 foreach (Settings::defaults()['services'] as $key => $default) {
+                    // Rows handled by Site Kit are rendered disabled, so the browser does not
+                    // submit them: keep what is stored for when Site Kit goes away.
+                    if (in_array($key, $siteKitManaged, true)) {
+                        $services[$key] = (array) ($stored[$key] ?? $default);
+                        continue;
+                    }
                     $row = $svcInput[$key] ?? [];
                     $services[$key] = [
                         'enabled' => !empty($row['enabled']),
@@ -611,6 +619,7 @@ class SettingsPage
         $services = $this->settings->all()['services'];
         $meta = $this->settings->predefinedServiceMeta();
         $categories = array_keys($this->settings->all()['categories']);
+        $siteKitManaged = $this->registry->siteKitManagedServices();
         $this->renderSiteKitNotice();
         ?>
         <h3><?= esc_html__('Predefined services', 'lcmt-dev-consent') ?></h3>
@@ -625,36 +634,43 @@ class SettingsPage
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($services as $key => $row): $m = $meta[$key] ?? []; ?>
-                    <tr>
+                <?php foreach ($services as $key => $row):
+                    $m = $meta[$key] ?? [];
+                    $managed = in_array($key, $siteKitManaged, true);
+                    $dis = $managed ? ' disabled' : '';
+                    ?>
+                    <tr<?= $managed ? ' style="opacity:.5"' : '' ?>>
                         <td>
                             <strong><?= esc_html($m['name'] ?? $key) ?></strong><br>
                             <small><a href="<?= esc_url($m['uri'] ?? '#') ?>" target="_blank" rel="noopener"><?= esc_html__('Privacy policy', 'lcmt-dev-consent') ?></a></small>
+                            <?php if ($managed): ?>
+                                <br><em><?= esc_html__('Managed by Google Site Kit', 'lcmt-dev-consent') ?></em>
+                            <?php endif; ?>
                         </td>
-                        <td><input type="checkbox" name="lcmt[services][<?= esc_attr($key) ?>][enabled]" <?php checked(!empty($row['enabled'])); ?>></td>
+                        <td><input type="checkbox" name="lcmt[services][<?= esc_attr($key) ?>][enabled]" <?php checked(!empty($row['enabled'])); ?><?= $dis ?>></td>
                         <td>
                             <?php foreach (($m['id_fields'] ?? []) as $field): ?>
                                 <label style="display:block;margin-bottom:4px">
                                     <span style="display:inline-block;min-width:90px"><?= esc_html($field['label']) ?></span>
-                                    <input type="text" name="lcmt[services][<?= esc_attr($key) ?>][<?= esc_attr($field['key']) ?>]" value="<?= esc_attr($row[$field['key']] ?? '') ?>" placeholder="<?= esc_attr($field['placeholder'] ?? '') ?>">
+                                    <input type="text" name="lcmt[services][<?= esc_attr($key) ?>][<?= esc_attr($field['key']) ?>]" value="<?= esc_attr($row[$field['key']] ?? '') ?>" placeholder="<?= esc_attr($field['placeholder'] ?? '') ?>"<?= $dis ?>>
                                 </label>
                             <?php endforeach; ?>
                             <?php if ($key === 'googletagmanager'): ?>
                                 <label style="display:block;margin-top:6px">
-                                    <input type="checkbox" name="lcmt[services][<?= esc_attr($key) ?>][consent_mode]" <?php checked(!empty($row['consent_mode'])); ?>>
+                                    <input type="checkbox" name="lcmt[services][<?= esc_attr($key) ?>][consent_mode]" <?php checked(!empty($row['consent_mode'])); ?><?= $dis ?>>
                                     <?= esc_html__('Use Google Consent Mode v2', 'lcmt-dev-consent') ?>
                                 </label>
                                 <p class="description" style="margin:4px 0 0"><?= esc_html__('When enabled, GTM loads on every page with all 4 consent signals denied by default. The banner shows 4 individual toggles (analytics_storage, ad_storage, ad_user_data, ad_personalization) instead of one GTM toggle.', 'lcmt-dev-consent') ?></p>
                             <?php endif; ?>
                         </td>
                         <td>
-                            <select name="lcmt[services][<?= esc_attr($key) ?>][category]">
+                            <select name="lcmt[services][<?= esc_attr($key) ?>][category]"<?= $dis ?>>
                                 <?php foreach ($categories as $cat): ?>
                                     <option value="<?= esc_attr($cat) ?>" <?php selected($row['category'], $cat); ?>><?= esc_html($cat) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </td>
-                        <td><input type="text" name="lcmt[services][<?= esc_attr($key) ?>][display_name]" value="<?= esc_attr($row['display_name'] ?? '') ?>"></td>
+                        <td><input type="text" name="lcmt[services][<?= esc_attr($key) ?>][display_name]" value="<?= esc_attr($row['display_name'] ?? '') ?>"<?= $dis ?>></td>
                     </tr>
                     <tr class="lcmt-cookie-editor-row">
                         <td colspan="5"><?php $this->renderCookieEditor($key); ?></td>
@@ -711,6 +727,7 @@ class SettingsPage
                     ['code' => []]
                 ) ?>
             </p>
+            <p><?= esc_html__('The Google Analytics and Google Tag Manager services below are switched off while Site Kit inserts its tag, to avoid counting visits twice: use the Analytics and Tag Manager modules of Site Kit instead. Their settings are kept.', 'lcmt-dev-consent') ?></p>
             <input type="hidden" name="lcmt[sitekit_advanced_shown]" value="1">
             <label style="display:block;margin-top:8px">
                 <input type="checkbox" name="lcmt[sitekit_advanced]" <?php checked($advanced); ?>>
