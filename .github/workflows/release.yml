@@ -51,6 +51,25 @@ jobs:
       - name: Build the zip
         run: git archive --format=zip --prefix=lcmt-dev-consent/ -o lcmt-dev-consent.zip HEAD
 
+      # Guards against files missing from git, e.g. caught by a .gitignore rule:
+      # without them the update checker fatals on every site (1.5.1 shipped
+      # without lib/plugin-update-checker/vendor/Parsedown.php).
+      - name: Check the zip carries the runtime files
+        run: |
+          for file in \
+            lcmt-dev-consent.php \
+            src/Updater.php \
+            assets/dist/manifest.json \
+            lib/plugin-update-checker/plugin-update-checker.php \
+            lib/plugin-update-checker/load-v5p7.php \
+            lib/plugin-update-checker/vendor/Parsedown.php \
+            lib/plugin-update-checker/vendor/PucReadmeParser.php; do
+            if ! unzip -l lcmt-dev-consent.zip "lcmt-dev-consent/$file" > /dev/null; then
+              echo "::error::$file is missing from the zip: is it ignored by .gitignore?"
+              exit 1
+            fi
+          done
+
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
