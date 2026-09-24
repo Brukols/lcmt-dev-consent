@@ -734,7 +734,7 @@ class SettingsPage
                 <?= esc_html__('Advanced mode: load the Google tag before consent', 'lcmt-dev-consent') ?>
             </label>
             <p class="description" style="margin:4px 0 0">
-                <?= esc_html__('Unchecked (recommended): the Site Kit tag is blocked until the visitor grants at least one signal, so nothing is sent to Google before consent. Checked: the tag always loads with every signal denied, and Google receives cookieless pings used for modelling — the CNIL considers this data collection without consent.', 'lcmt-dev-consent') ?>
+                <?= esc_html__('Unchecked (recommended): the Site Kit tag is blocked until the visitor grants at least one signal, so nothing is sent to Google before consent. Checked: until the visitor chooses, the tag loads with every signal denied and Google receives cookieless pings used for modelling — the CNIL considers this data collection without consent. Once the visitor refuses everything, the tag is blocked from the next page on.', 'lcmt-dev-consent') ?>
             </p>
         </div>
         <?php

@@ -104,6 +104,34 @@ class SiteKitTest extends TestCase
         $this->assertFalse($this->make()->filterTagBlocked(false));
     }
 
+    public function test_advanced_mode_loads_tag_before_any_choice(): void
+    {
+        $this->stubOptions($this->siteKitOptions([], ['analytics-4'], ['sitekit_advanced' => true]));
+        $_COOKIE['cookieConsent'] = '!google_analytics_storage=wait!google_ad_storage=wait!google_ad_user_data=wait!google_ad_personalization=wait';
+        $this->assertFalse($this->make()->filterTagBlocked(false));
+    }
+
+    public function test_advanced_mode_blocks_tag_once_every_signal_is_refused(): void
+    {
+        $this->stubOptions($this->siteKitOptions([], ['analytics-4'], ['sitekit_advanced' => true]));
+        $_COOKIE['cookieConsent'] = '!google_analytics_storage=false!google_ad_storage=false!google_ad_user_data=false!google_ad_personalization=false!cid=abc';
+        $this->assertTrue($this->make()->filterTagBlocked(false));
+    }
+
+    public function test_advanced_mode_loads_tag_when_only_some_signals_are_refused(): void
+    {
+        $this->stubOptions($this->siteKitOptions([], ['analytics-4'], ['sitekit_advanced' => true]));
+        $_COOKIE['cookieConsent'] = '!google_analytics_storage=true!google_ad_storage=false!google_ad_user_data=false!google_ad_personalization=false';
+        $this->assertFalse($this->make()->filterTagBlocked(false));
+    }
+
+    public function test_advanced_mode_loads_tag_while_a_signal_is_undecided(): void
+    {
+        $this->stubOptions($this->siteKitOptions([], ['analytics-4'], ['sitekit_advanced' => true]));
+        $_COOKIE['cookieConsent'] = '!google_analytics_storage=false!google_ad_storage=false';
+        $this->assertFalse($this->make()->filterTagBlocked(false));
+    }
+
     public function test_keeps_a_block_decided_by_someone_else(): void
     {
         $this->stubOptions($this->siteKitOptions([], ['analytics-4'], ['sitekit_advanced' => true]));
