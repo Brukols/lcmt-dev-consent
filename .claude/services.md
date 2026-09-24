@@ -100,7 +100,7 @@ Unlike the analytics services, `youtube` has no single global script. Each embed
 
 - `wp_oembed_get_html` — replaces the iframe for any `youtube.com` / `youtu.be` / `youtube-nocookie.com` URL when consent is missing.
 - `render_block` (`core/embed` with `providerNameSlug: youtube|youtube-shorts`, plus legacy `core-embed/youtube`).
-- `YouTubeEmbed::render($urlOrId)` — public static helper for theme/plugin code (used by the Air Sceno theme's product page).
+- `YouTubeEmbed::render($urlOrId)` — public static helper for theme/plugin code.
 
 When consent IS granted, all three return the real `<iframe>` server-side; no client-side JS runs. When consent is missing, they return a styled placeholder with `data-lcmt-youtube-id="…"` and an "Accept and play" button. The placeholder is upgraded by [`assets/src/youtube.ts`](../assets/src/youtube.ts), enqueued only when `youtube` service is enabled and not yet accepted (see `Assets::enqueueYoutube()`). One accept upgrades all placeholders on the page via the `lcmt-consent:accepted` event.
 

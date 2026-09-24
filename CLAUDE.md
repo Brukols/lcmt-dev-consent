@@ -19,12 +19,15 @@ Performance-focused cookie consent banner for WordPress. Ships its own PHP class
 - [.claude/admin-settings.md](.claude/admin-settings.md) — Settings API tabs, options schema, per-tab save, sanitization
 - [.claude/frontend.md](.claude/frontend.md) — banner TS + SCSS, build toolchain, CSS-variable theming, `!important` rationale
 - [.claude/services.md](.claude/services.md) — predefined services, Google Consent Mode v2 flow, client/server injectors
+- [.claude/releasing.md](.claude/releasing.md) — GitHub releases, update checker, how to publish a version
 - [.claude/extending.md](.claude/extending.md) — developer API: `lcmt_dev_consent_services` filter, `Consent::isAllowed()`, `lcmt-consent:accepted` CustomEvent, Polylang/WPML integration
 
 ## Key files (quick reference)
 | File | Purpose |
 |------|---------|
 | `lcmt-dev-consent.php` | Plugin header, autoloader, boot on `plugins_loaded` |
+| `src/Updater.php` | Update checker wired to the GitHub releases (`lib/plugin-update-checker/`, vendored) |
+| `.github/workflows/release.yml` | Builds `lcmt-dev-consent.zip` and publishes the release on a `v*` tag |
 | `src/Plugin.php` | Wires all components together |
 | `src/Consent.php` | Public `isAllowed()` / `getCookies()` / `isComplete()` API |
 | `src/Admin/Settings.php` | Option accessor, defaults, predefined-service metadata |
@@ -48,4 +51,5 @@ Performance-focused cookie consent banner for WordPress. Ships its own PHP class
 - **GTM Consent Mode v2** is fundamentally different from the standard "load on accept" model: GTM always loads, gtag defaults all signals to denied, and each accept fires a `gtag('consent','update',…)` — see [.claude/services.md](.claude/services.md).
 - **Google Site Kit** is never reconfigured: its tag is gated through its own `googlesitekit_{module}_tag_blocked` filters, so deactivating this plugin restores Site Kit as it was — see [.claude/services.md](.claude/services.md#google-site-kit).
 - **Per-tab saves** are critical: the admin form must submit only the current tab's slice of settings, otherwise saving one tab wipes others. See `SettingsPage::sanitizeForTab()`.
+- **Never change the slug** (`lcmt-dev-consent` folder, main file, text domain): the update checker and WordPress identify the plugin by it. Only the displayed name is "LCMT Consent".
 - **Autoloaded option** gives zero extra DB queries per request on the front-end.

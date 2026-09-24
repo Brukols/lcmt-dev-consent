@@ -28,6 +28,7 @@ INCLUDE=(
   "src"
   "languages"
   "assets/dist"
+  "lib"
 )
 
 # --- Tooling checks -----------------------------------------------------------

@@ -1,0 +1,57 @@
+# Publishes a release when a version tag is pushed (git tag v1.5.0 && git push --tags).
+#
+# The zip attached to the release is what sites install through the update
+# checker (src/Updater.php), so it must unpack into a lcmt-dev-consent/ folder
+# and carry the built assets.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Check the tag matches the plugin version
+        run: |
+          header=$(grep -m1 -oP '^\s*\*\s*Version:\s*\K\S+' lcmt-dev-consent.php)
+          constant=$(grep -m1 -oP "LCMT_DEV_CONSENT_VERSION', '\K[^']+" lcmt-dev-consent.php)
+          package=$(node -p "require('./package.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+
+          if [ "$header" != "$tag" ] || [ "$constant" != "$tag" ] || [ "$package" != "$tag" ]; then
+            echo "::error::Tag $tag, plugin header $header, LCMT_DEV_CONSENT_VERSION $constant, package.json $package: bump them all before tagging."
+            exit 1
+          fi
+
+      - name: Check the committed assets are built from the sources
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+
+          if [ -n "$(git status --porcelain -- assets/dist)" ]; then
+            git status --short -- assets/dist
+            echo "::error::assets/dist is out of date: run yarn build and commit it before tagging."
+            exit 1
+          fi
+
+      - name: Build the zip
+        run: git archive --format=zip --prefix=lcmt-dev-consent/ -o lcmt-dev-consent.zip HEAD
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" lcmt-dev-consent.zip --title "$GITHUB_REF_NAME" --generate-notes
