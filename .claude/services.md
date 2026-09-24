@@ -61,7 +61,7 @@ Each has a name + description that run through the translation layer (English de
 All 4 signals default to `"denied"` if the cookie isn't set yet. Returning visitors get `"granted"` values straight from the initial call, so GTM never sees a denied→granted flip on the server render.
 
 ### 4. Client-side accept (first visit)
-`assets/src/injectors.ts` defines 4 entries that call `window.gtag('consent', 'update', { <signal>: 'granted' })`. The `gtag` global was defined in step 3, so GTM reacts live to the update — no reload required.
+`assets/src/injectors.ts` defines 4 entries that queue their signal; the signals accepted in the same commit are flushed as **one** `window.gtag('consent', 'update', { <signal>: 'granted', … })` in a microtask (Google recommends a single update: one update per signal made gtag send hits with a partial consent state, e.g. `gcs=G101`). The `gtag` global was defined in step 3, so the tag reacts live to the update — no reload required.
 
 ### Turning Consent Mode v2 OFF
 If the admin unchecks the box, `isGtmConsentMode()` returns false. GTM becomes a normal per-service toggle again: the built-in injector in `ServiceRegistry::builtinInjectPhp('googletagmanager')` takes over, and the 4 virtual services disappear. The default server-side snippet is not emitted.
@@ -80,7 +80,7 @@ All of: `GOOGLESITEKIT_VERSION` defined, `analytics-4` in the `googlesitekit_act
 
 ### Basic mode (default)
 - `filterTagBlocked()` blocks Site Kit's tags until the cookie has **at least one signal granted** → nothing reaches Google before consent.
-- Signal services carry `data.sitekit_id`. On first accept, `injectors.ts` sends each `consent update` then (deferred with `setTimeout(0)`, once per page) loads `gtag/js?id=<sitekit_id>` + `gtag('js')` + `gtag('config')` — so every signal of the same commit is updated before the config runs. No reload.
+- Signal services carry `data.sitekit_id`. On first accept, `injectors.ts` sends the batched `consent update` (microtask) then (deferred with `setTimeout(0)`, once per page) loads `gtag/js?id=<sitekit_id>` + `gtag('js')` + `gtag('config')` — so every signal of the same commit is updated before the config runs. No reload.
 - Later pages: the tag is no longer blocked, **Site Kit prints its own tag** (with its conversion events, linker, custom dimensions) after our defaults.
 
 ### Advanced mode (`sitekit_advanced` setting)

@@ -11,7 +11,7 @@ Location: **Settings → Cookie Consent** (`options-general.php?page=lcmt-dev-co
 | Slug | Method | Scope |
 |------|--------|-------|
 | `general` | `tab_general()` | `enabled`, `position`, `privacy_url`, `texts.*` |
-| `appearance` | `tab_appearance()` | `appearance.*` (colors + radius + z-index + `title_icon`) |
+| `appearance` | `tab_appearance()` | `appearance.*` (colors + radius + z-index + `title_icon` + `shadow`) |
 | `services` | `tab_services()` | `services.*` (predefined service config + GTM Consent Mode v2 checkbox), `sitekit_advanced` (Site Kit block, only rendered when Site Kit is detected) |
 | `categories` | `tab_categories()` | `categories.*` (key/name/description) |
 | `advanced` | `tab_advanced()` | `cookie_name`, `cookie_lifetime_days`, `custom_css`, reset-consents button |
@@ -50,6 +50,7 @@ Single autoloaded row: `lcmt_dev_consent_settings`. Defaults live in [`Settings:
         'radius' /* 0-50 */, 'z_index',
         'title_icon' /* 'icon' (default, inline cookie SVG) | 'emoji' (🍪) | 'custom' (uses title_icon_url) | 'none' — shown before banner + panel titles */,
         'title_icon_url' /* media URL used when title_icon='custom'; media picker via wp_enqueue_media() */,
+        'shadow' /* 'none' | 'light' (default) | 'medium' | 'strong' — preset from Settings::shadowPresets(), emitted as --lcmt-consent-shadow */,
     ],
     'services' => [
         'googletagmanager' => ['enabled', 'id', 'category', 'display_name', 'consent_mode'],

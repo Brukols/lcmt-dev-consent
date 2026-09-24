@@ -6,6 +6,7 @@
     --lcmt-consent-border: #000000;
     --lcmt-consent-radius: 0px;
     --lcmt-consent-z: 1001;
+    --lcmt-consent-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .lcmt-consent {
@@ -17,7 +18,7 @@
     color: var(--lcmt-consent-text);
     border: 1px solid var(--lcmt-consent-border);
     border-radius: var(--lcmt-consent-radius);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--lcmt-consent-shadow);
     z-index: var(--lcmt-consent-z);
     opacity: 0;
     pointer-events: none;

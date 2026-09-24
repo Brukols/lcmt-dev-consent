@@ -54,6 +54,8 @@ class Banner
             '--lcmt-consent-border' => $a['border'] ?? $defaults['border'],
             '--lcmt-consent-radius' => ((int) ($a['radius'] ?? $defaults['radius'])) . 'px',
             '--lcmt-consent-z' => (int) ($a['z_index'] ?? $defaults['z_index']),
+            '--lcmt-consent-shadow' => Settings::shadowPresets()[$a['shadow'] ?? $defaults['shadow']]
+                ?? Settings::shadowPresets()[$defaults['shadow']],
         ];
         $lines = [];
         foreach ($map as $var => $value) {

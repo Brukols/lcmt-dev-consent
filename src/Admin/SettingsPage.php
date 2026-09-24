@@ -310,6 +310,9 @@ class SettingsPage
                         ? $app['title_icon']
                         : 'icon',
                     'title_icon_url' => esc_url_raw($app['title_icon_url'] ?? ''),
+                    'shadow' => array_key_exists($app['shadow'] ?? '', Settings::shadowPresets())
+                        ? $app['shadow']
+                        : 'light',
                 ]];
 
             case 'services':
@@ -567,6 +570,19 @@ class SettingsPage
             <tr>
                 <th><?= esc_html__('Z-index', 'lcmt-dev-consent') ?></th>
                 <td><input type="number" min="0" name="lcmt[appearance][z_index]" value="<?= esc_attr($a['z_index']) ?>"></td>
+            </tr>
+            <tr>
+                <th><?= esc_html__('Shadow', 'lcmt-dev-consent') ?></th>
+                <td>
+                    <?php $shadow = $a['shadow'] ?? 'light'; ?>
+                    <select name="lcmt[appearance][shadow]">
+                        <option value="none" <?php selected($shadow, 'none') ?>><?= esc_html__('None', 'lcmt-dev-consent') ?></option>
+                        <option value="light" <?php selected($shadow, 'light') ?>><?= esc_html__('Light', 'lcmt-dev-consent') ?></option>
+                        <option value="medium" <?php selected($shadow, 'medium') ?>><?= esc_html__('Medium', 'lcmt-dev-consent') ?></option>
+                        <option value="strong" <?php selected($shadow, 'strong') ?>><?= esc_html__('Strong', 'lcmt-dev-consent') ?></option>
+                    </select>
+                    <p class="description"><?= esc_html__('A stronger shadow sets the banner apart from a white page.', 'lcmt-dev-consent') ?></p>
+                </td>
             </tr>
             <tr>
                 <th><?= esc_html__('Title icon', 'lcmt-dev-consent') ?></th>

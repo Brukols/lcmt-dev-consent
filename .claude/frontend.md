@@ -110,6 +110,7 @@ Written by `setCookie()` in `banner.ts` with `SameSite=Lax; path=/; expires=<day
     --lcmt-consent-border: #000000;
     --lcmt-consent-radius: 0px;
     --lcmt-consent-z: 1001;
+    --lcmt-consent-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* appearance.shadow preset */
 }
 ```
 **Do not** move these under `.lcmt-consent` — the PHP-emitted `<style>:root{--…}</style>` block from `Banner::renderStyleVars()` is also at `:root` specificity, so theme overrides work cleanly. A class-scoped declaration out-specifies `:root` and will block admin color changes.
