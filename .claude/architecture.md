@@ -28,6 +28,8 @@ lcmt-dev-consent/
 │   │   ├── SettingsPage.php
 │   │   ├── Settings.php
 │   │   └── Translations.php
+│   ├── Integrations/
+│   │   └── SiteKit.php          # Google Site Kit detection + tag blocking (Consent Mode v2)
 │   ├── Log/
 │   │   ├── ConsentLog.php       # consent_log table, insert/query/purge, CSV export
 │   │   └── RestController.php   # POST lcmt-dev-consent/v1/log
@@ -63,13 +65,15 @@ load_plugin_textdomain('lcmt-dev-consent', …, 'languages');
 3. Instantiates `Translations` and calls `register()`, which hooks into `init` and `update_option_lcmt_dev_consent_settings` to feed admin-entered strings to Polylang/WPML if active.
 4. If `is_admin()`: registers `SettingsPage` (admin menu, save handler, asset enqueue for color picker).
 5. Always registers `Assets`, `Banner`, and `ScriptInjector` — each decides internally whether to output anything based on consent state.
+6. Registers `Integrations\SiteKit` (created in step 2 and injected into `ServiceRegistry`): it hooks Site Kit's `googlesitekit_{module}_tag_blocked` filters only when Site Kit prints a tag. See [services.md](services.md#google-site-kit).
 
 ## Request-time data flow (front-end, non-admin)
 
 Three hooks, all reading the same `$_COOKIE[<cookieName>]`:
 
 ### 1. `wp_head` priority 1 — `ScriptInjector::inject()`
-- If GTM Consent Mode v2 is enabled: emit `gtag('consent','default', {…})` with state from cookie (defaulting to "denied"), then the GTM loader — **unconditionally**.
+- If Consent Mode v2 is on (GTM Consent Mode enabled, or Site Kit detected): emit `gtag('consent','default', {…})` with state from cookie (defaulting to "denied"). With Site Kit, granted signals are repeated as an `update`.
+- If GTM Consent Mode is enabled: then the GTM loader — **unconditionally**.
 - Then iterate `ServiceRegistry::all()` and for every service where the cookie says `=true`, call its `injectPhp` callable and echo the returned HTML (typically a `<script>` tag).
 
 ### 2. `wp_enqueue_scripts` — `Assets::enqueue()`

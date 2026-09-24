@@ -42,11 +42,34 @@ function gtagConsentUpdate(signal: string): void {
     window.gtag("consent", "update", { [signal]: "granted" });
 }
 
+let googleTagRequested = false;
+
+// Google Site Kit, basic mode: its tag is blocked server-side until consent, so
+// the first accept loads it here (later pages get Site Kit's own tag back).
+// Deferred to the next task so every signal accepted in the same commit is
+// already updated when the tag's config runs.
+function loadSiteKitTag(id: string): void {
+    if (googleTagRequested) return;
+    googleTagRequested = true;
+    setTimeout(() => {
+        externalScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`);
+        window.gtag?.("js", new Date());
+        window.gtag?.("config", id);
+    }, 0);
+}
+
+function consentSignal(signal: string): InjectorFn {
+    return ({ sitekit_id }) => {
+        gtagConsentUpdate(signal);
+        if (sitekit_id) loadSiteKitTag(sitekit_id);
+    };
+}
+
 const INJECTORS: Record<string, InjectorFn> = {
-    google_analytics_storage: () => gtagConsentUpdate("analytics_storage"),
-    google_ad_storage: () => gtagConsentUpdate("ad_storage"),
-    google_ad_user_data: () => gtagConsentUpdate("ad_user_data"),
-    google_ad_personalization: () => gtagConsentUpdate("ad_personalization"),
+    google_analytics_storage: consentSignal("analytics_storage"),
+    google_ad_storage: consentSignal("ad_storage"),
+    google_ad_user_data: consentSignal("ad_user_data"),
+    google_ad_personalization: consentSignal("ad_personalization"),
     googletagmanager: ({ id }) => {
         if (!id) return;
         inlineScript(

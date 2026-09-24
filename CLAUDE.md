@@ -34,7 +34,8 @@ Performance-focused cookie consent banner for WordPress. Ships its own PHP class
 | `src/Services/Service.php` | Value object passed to injectors |
 | `src/Frontend/Assets.php` | Conditional enqueue (only while consent pending) |
 | `src/Frontend/Banner.php` | Renders banner HTML + CSS-variable `<style>` block in `wp_footer` |
-| `src/Frontend/ScriptInjector.php` | Server-side injection in `wp_head` for accepted services + GTM Consent Mode snippet |
+| `src/Frontend/ScriptInjector.php` | Server-side injection in `wp_head` for accepted services + Consent Mode defaults + GTM loader |
+| `src/Integrations/SiteKit.php` | Google Site Kit detection; blocks its tag until consent (Consent Mode v2 basic/advanced) |
 | `assets/src/banner.ts` | Main banner class |
 | `assets/src/injectors.ts` | Client-side injectors (first-accept in same session) |
 | `assets/src/banner.scss` | Styles, CSS variables on `:root`, BEM class names |
@@ -45,5 +46,6 @@ Performance-focused cookie consent banner for WordPress. Ships its own PHP class
 - **CSS variables must live on `:root`**, not on `.lcmt-consent`. If defaults are placed on `.lcmt-consent`, they out-specify the PHP-emitted `:root { --… }` block and prevent admin colors from applying.
 - **Theme button resets** (`button { background-color: transparent }`) have the same specificity as plugin button classes and load later. `!important` on accent background/color is warranted — documented inline in `banner.scss`.
 - **GTM Consent Mode v2** is fundamentally different from the standard "load on accept" model: GTM always loads, gtag defaults all signals to denied, and each accept fires a `gtag('consent','update',…)` — see [.claude/services.md](.claude/services.md).
+- **Google Site Kit** is never reconfigured: its tag is gated through its own `googlesitekit_{module}_tag_blocked` filters, so deactivating this plugin restores Site Kit as it was — see [.claude/services.md](.claude/services.md#google-site-kit).
 - **Per-tab saves** are critical: the admin form must submit only the current tab's slice of settings, otherwise saving one tab wipes others. See `SettingsPage::sanitizeForTab()`.
 - **Autoloaded option** gives zero extra DB queries per request on the front-end.

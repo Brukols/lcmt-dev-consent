@@ -3,16 +3,19 @@
 namespace LcmtDev\Consent\Services;
 
 use LcmtDev\Consent\Admin\Settings;
+use LcmtDev\Consent\Integrations\SiteKit;
 
 class ServiceRegistry
 {
     private Settings $settings;
+    private ?SiteKit $siteKit;
     /** @var Service[]|null */
     private ?array $services = null;
 
-    public function __construct(Settings $settings)
+    public function __construct(Settings $settings, ?SiteKit $siteKit = null)
     {
         $this->settings = $settings;
+        $this->siteKit = $siteKit;
     }
 
     /** @return Service[] */
@@ -28,6 +31,7 @@ class ServiceRegistry
         $uiServices = $this->settings->get('services', []);
         $meta = $this->settings->predefinedServiceMeta();
         $gtmInConsentMode = $this->isGtmConsentMode();
+        $siteKitTagId = $this->isSiteKitDetected() ? $this->siteKit->tagId() : '';
 
         foreach ($uiServices as $key => $config) {
             if (empty($config['enabled'])) {
@@ -35,6 +39,10 @@ class ServiceRegistry
             }
             // In GTM Consent Mode v2, GTM loads unconditionally and isn't a user-facing toggle.
             if ($key === 'googletagmanager' && $gtmInConsentMode) {
+                continue;
+            }
+            // Site Kit already prints this tag under Consent Mode: loading it twice would double-count.
+            if ($key === 'googleanalytics' && $siteKitTagId !== '' && ($config['id'] ?? '') === $siteKitTagId) {
                 continue;
             }
             $m = $meta[$key] ?? [];
@@ -64,8 +72,14 @@ class ServiceRegistry
             ]);
         }
 
-        // Consent Mode v2 virtual services — shown when GTM has Consent Mode enabled.
-        if ($gtmInConsentMode) {
+        // Consent Mode v2 virtual services — shown when GTM has Consent Mode enabled
+        // or Site Kit prints its tag.
+        if ($this->isConsentMode()) {
+            $signalData = [];
+            // Basic mode: Site Kit's tag is blocked until consent, so the banner loads it on first accept.
+            if ($siteKitTagId !== '' && !$this->siteKit->isAdvancedMode()) {
+                $signalData['sitekit_id'] = $siteKitTagId;
+            }
             foreach ($this->settings->consentModeServices() as $key => $meta2) {
                 $services[$key] = new Service([
                     'key' => $key,
@@ -73,7 +87,7 @@ class ServiceRegistry
                     'description' => $meta2['description'],
                     'category' => $meta2['category'],
                     'uri' => 'https://support.google.com/analytics/answer/9976101',
-                    'data' => ['signal' => $meta2['signal']],
+                    'data' => ['signal' => $meta2['signal']] + $signalData,
                     'source' => 'ui',
                 ]);
             }
@@ -115,6 +129,24 @@ class ServiceRegistry
             if ($s->key === $key) return $s;
         }
         return null;
+    }
+
+    /**
+     * Whether gtag consent signals are managed: GTM Consent Mode, or a detected Site Kit tag.
+     */
+    public function isConsentMode(): bool
+    {
+        return $this->isGtmConsentMode() || $this->isSiteKitDetected();
+    }
+
+    public function isSiteKitDetected(): bool
+    {
+        return $this->siteKit !== null && $this->siteKit->isDetected();
+    }
+
+    public function siteKit(): ?SiteKit
+    {
+        return $this->siteKit;
     }
 
     public function isGtmConsentMode(): bool

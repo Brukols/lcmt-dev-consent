@@ -12,6 +12,7 @@ use LcmtDev\Consent\Frontend\YouTubeEmbed;
 use LcmtDev\Consent\Frontend\GoogleMapsEmbed;
 use LcmtDev\Consent\Frontend\CookieTable;
 use LcmtDev\Consent\Frontend\ConsentReopen;
+use LcmtDev\Consent\Integrations\SiteKit;
 use LcmtDev\Consent\Log\ConsentLog;
 use LcmtDev\Consent\Log\RestController;
 use LcmtDev\Consent\Services\CookieRegistry;
@@ -22,7 +23,8 @@ class Plugin
     public function boot(): void
     {
         $settings = new Settings();
-        $registry = new ServiceRegistry($settings);
+        $siteKit = new SiteKit($settings);
+        $registry = new ServiceRegistry($settings, $siteKit);
         $translations = new Translations($settings);
         $translations->register();
 
@@ -48,6 +50,7 @@ class Plugin
         (new Assets($settings, $registry, $translations))->register();
         (new Banner($settings, $registry, $translations))->register();
         (new ScriptInjector($settings, $registry))->register();
+        $siteKit->register();
         (new YouTubeEmbed())->register();
         (new GoogleMapsEmbed())->register();
         (new CookieTable($cookies, $translations))->register();
